@@ -5,4 +5,5 @@ async function getStudentUser(id: number){
     return response.data;
 }
 
+
 export const authServices = {getStudentUser};
