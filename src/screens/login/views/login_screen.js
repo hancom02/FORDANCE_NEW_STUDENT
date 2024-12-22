@@ -2,9 +2,9 @@ import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useAuth } from '../../../store/auth_slice';
 import MyColor from '../../../constants/color';
 import { Text } from '@rneui/themed';
+import { useAuth } from '../../../store/auth_slice';
 
 // type RootStackParamList = {
 //   BottomTab: undefined;
@@ -16,7 +16,9 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
-  const { signIn } = useAuth();
+
+  console.log(useAuth);
+  const { signIn, signUp, isLogin, error } = useAuth();
 
   // const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -24,18 +26,30 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-      Alert.alert('Login successful!');
-      
-      navigation.navigate('BottomTab');  
+      if (isLogin) {
+        Alert.alert('Login successful!');
+        navigation.navigate('BottomTab');  
+      } else {
+        Alert.alert('Error', error);
+      }
+    } catch (err) {
+      Alert.alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleNavSignUp = async () => {
+    setLoading(true);
+    try {
+      await signUp(email, password);
+      Alert.alert('Sign up successful!');      
+      navigation.navigate('LoginScreen');  
     } catch (err) {
       // const error = err as Error;
       Alert.alert(err.message);
     } finally {
       setLoading(false);
     }
-  };
-  const handleNavSignUp = () => {
-
   }
 
   return (
