@@ -1,5 +1,4 @@
-import { Text } from "@rneui/themed";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 
 const ClassScreen = () => {
     return (
