@@ -65,34 +65,45 @@ export const useAuth = create(
       },      
       signUp: async (email, password) => {
         try {
-          const username = 'test user';
           if (typeof password !== 'string' || password.trim() === '') {
             throw new Error('Password must be a non-empty string');
           }
-          const saltRounds = 10;
-          if (!Number.isInteger(saltRounds)) {
-            throw new Error('Invalid salt rounds');
-          }
+          // const saltRounds = 10;
+          // if (!Number.isInteger(saltRounds)) {
+          //   throw new Error('Invalid salt rounds');
+          // }
           // const hashedPassword = await bcrypt.hash('hancom02', saltRounds);
           // console.log("hashedPassword: " + hashedPassword);
 
-          const {data, error } = await supabase.auth.signUp({ email, password});
-          if (error) throw new Error(error.message);
+          // const {data, error } = await supabase.auth.signUp({ email, password});
+         
 
+          const { data, error } = await supabase.auth.signUp(
+            {
+              email: email,
+              password: password,
+              options: {
+                data: {
+                  role:'student',
+                }
+              }
+            }
+          )
+          if (error) throw new Error(error.message);
           console.log('User signed up successfully:', data.user.email);
 
-          const { error: insertError } = await supabase.from('users').insert([
-            {
-              id: data.user.id, 
-              created_at: data.user.created_at || new Date(), 
-              email: data.user.email,
-              password: '', 
-              username: username, 
-              role: 'student', 
-            },
-          ]);
+          // const { error: insertError } = await supabase.from('users').insert([
+          //   {
+          //     id: data.user.id, 
+          //     created_at: data.user.created_at || new Date(), 
+          //     email: data.user.email,
+          //     password: '', 
+          //     username: username, 
+          //     role: 'student', 
+          //   },
+          // ]);
       
-          if (insertError) throw new Error(insertError.message);
+          // if (insertError) throw new Error(insertError.message);
       
           console.log('User profile created in users table successfully');
 
