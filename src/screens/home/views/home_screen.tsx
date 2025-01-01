@@ -1,11 +1,8 @@
 // src/screens/HomeScreen.tsx
-
-import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {View, Text, StyleSheet, Button} from 'react-native';
 
-const HomeScreen = () => {
-  const navigation = useNavigation();
+const HomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View>

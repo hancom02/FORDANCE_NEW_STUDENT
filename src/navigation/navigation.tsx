@@ -9,6 +9,7 @@ import LessionScreen from '../screens/lession/views/lession_screen';
 import MyColor from '../constants/color';
 import LoginScreen from '../screens/login/views/login_screen';
 import SearchScreen from '../screens/search/views/search_screen';
+import FilterScreen from '../screens/search/views/filter_screen';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ export default function Navigation() {
         <Stack.Screen name="BottomTab" component={BottomTab} />
         <Stack.Screen name="ClassScreen" component={ClassScreen} />
         <Stack.Screen name="LessionScreen" component={LessionScreen} />
+        <Stack.Screen name="FilterScreen" component={FilterScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

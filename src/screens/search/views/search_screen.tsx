@@ -8,17 +8,19 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {appFontSize, iconSize} from '../../../constants/dimensions';
+import {appFontSize, iconSize} from '../../../constants/common';
 import {StyleSheet} from 'react-native';
 import MyColor from '../../../constants/color';
 import SessionCard from '../components/SessionCard';
 
-export default function SearchScreen() {
+export default function SearchScreen({navigation}) {
+  // const navigation = useNavigation();
   const [btnSelected, setBtnSelected] = useState('sessions');
+
   return (
     <View>
-      {/* search input */}
       <View style={styles.mainInputContainer}>
+        {/* icon button */}
         <TouchableHighlight>
           <View>
             <Image
@@ -27,12 +29,23 @@ export default function SearchScreen() {
             />
           </View>
         </TouchableHighlight>
+        {/* search input */}
         <View style={styles.inputWrapper}>
           <Image
             source={require('../../../assests/img/icon.png')}
-            style={styles.logo}></Image>
+            style={styles.logo}/>
           <TextInput style={styles.textInput} placeholder="Search" />
         </View>
+
+        {/* icon button */}
+        <TouchableHighlight onPress={() => navigation.navigate('FilterScreen')}>
+          <View>
+            <Image
+              source={require('../../../assests/img/Filter_alt.png')}
+              style={styles.btnIcon}
+            />
+          </View>
+        </TouchableHighlight>
       </View>
       <View style={styles.btnGroup}>
         <TouchableOpacity
@@ -83,7 +96,7 @@ export default function SearchScreen() {
 
       <View style={styles.bodyContainer}>
         {/* <Text>Please enter query to search</Text> */}
-        <SessionCard></SessionCard>
+        <SessionCard/>
       </View>
     </View>
   );
@@ -99,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 14,
+    gap: 7,
     paddingHorizontal: myPadding.horizontal,
     paddingVertical: myPadding.vertical,
     borderBottomColor: MyColor.stroke,

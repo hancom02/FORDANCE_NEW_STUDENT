@@ -1,19 +1,27 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 
-const Tag = ({name, textColor, bgColor, weight}) => {
+const Tag = ({
+  text = null,
+  textColor = 'black',
+  bgColor = 'white',
+  weight = null,
+  size = 15,
+  style = {},
+}) => {
   return (
-    <View style={[styles.tag, {backgroundColor: bgColor}]}>
-      <Text style={{color: textColor, fontWeight: weight}}>{name}</Text>
+    <View style={[styles.tag, {backgroundColor: bgColor}, style]}>
+      <Text
+        style={{color: textColor, fontWeight: weight ?? 600, fontSize: size}}>
+        {text}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   tag: {
-    borderRadius: 4,
-    marginHorizontal: 6,
-    marginVertical: 8,
+    borderRadius: 5,
     paddingHorizontal: 8,
     paddingVertical: 4,
     alignSelf: 'center',

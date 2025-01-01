@@ -4,7 +4,7 @@ import {StyleSheet} from 'react-native';
 import {iconSize} from '../../../constants/common';
 import Tag from './Tag';
 
-const SessionCard = () => {
+const ClassCard = () => {
   return (
     <View>
       <View style={styles.card}>
@@ -37,6 +37,8 @@ const SessionCard = () => {
   );
 };
 
+export default ClassCard;
+
 const styles = StyleSheet.create({
   card: {
     position: 'relative',
@@ -46,7 +48,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 'auto',
     opacity: 0.75,
-    aspectRatio: 16 / 9,
+    aspectRatio: 10 / 16,
   },
   iconBtn: {
     height: iconSize.md,
@@ -75,5 +77,3 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
-
-export default SessionCard;
