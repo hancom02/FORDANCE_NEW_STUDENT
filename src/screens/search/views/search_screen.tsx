@@ -7,98 +7,105 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
 import {appFontSize, iconSize} from '../../../constants/common';
 import {StyleSheet} from 'react-native';
 import MyColor from '../../../constants/color';
 import SessionCard from '../components/SessionCard';
+import ClassCard from '../components/ClassCard';
 
 export default function SearchScreen({navigation}) {
   // const navigation = useNavigation();
   const [btnSelected, setBtnSelected] = useState('sessions');
 
   return (
-    <View>
-      <View style={styles.mainInputContainer}>
-        {/* icon button */}
-        <TouchableHighlight>
-          <View>
+    <ScrollView>
+      <View>
+        <View style={styles.mainInputContainer}>
+          {/* icon button */}
+          <TouchableHighlight>
+            <View>
+              <Image
+                source={require('../../../assests/img/Arrow_left.png')}
+                style={styles.btnIcon}
+              />
+            </View>
+          </TouchableHighlight>
+          {/* search input */}
+          <View style={styles.inputWrapper}>
             <Image
-              source={require('../../../assests/img/Arrow_left.png')}
-              style={styles.btnIcon}
+              source={require('../../../assests/img/icon.png')}
+              style={styles.logo}
             />
+            <TextInput style={styles.textInput} placeholder="Search" />
           </View>
-        </TouchableHighlight>
-        {/* search input */}
-        <View style={styles.inputWrapper}>
-          <Image
-            source={require('../../../assests/img/icon.png')}
-            style={styles.logo}/>
-          <TextInput style={styles.textInput} placeholder="Search" />
+
+          {/* icon button */}
+          <TouchableHighlight
+            onPress={() => navigation.navigate('FilterScreen')}>
+            <View>
+              <Image
+                source={require('../../../assests/img/Filter_alt.png')}
+                style={styles.btnIcon}
+              />
+            </View>
+          </TouchableHighlight>
+        </View>
+        <View style={styles.btnGroup}>
+          <TouchableOpacity
+            key={'sessions'}
+            style={[
+              styles.btn,
+              btnSelected === 'sessions'
+                ? styles.selectedBtn
+                : styles.notSelectedBtn,
+            ]}
+            onPress={() => {
+              Alert.alert('Left button pressed');
+              setBtnSelected('sessions');
+            }}>
+            <Text
+              style={[
+                styles.buttonText,
+                btnSelected === 'sessions'
+                  ? styles.btnTextSelected
+                  : styles.btnTextNotSelected,
+              ]}>
+              SESSIONS
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            key={'classes'}
+            style={[
+              styles.btn,
+              btnSelected === 'classes'
+                ? styles.selectedBtn
+                : styles.notSelectedBtn,
+            ]}
+            onPress={() => {
+              Alert.alert('Right button pressed');
+              setBtnSelected('classes');
+            }}>
+            <Text
+              style={[
+                styles.buttonText,
+                btnSelected === 'classes'
+                  ? styles.btnTextSelected
+                  : styles.btnTextNotSelected,
+              ]}>
+              CLASSES
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* icon button */}
-        <TouchableHighlight onPress={() => navigation.navigate('FilterScreen')}>
-          <View>
-            <Image
-              source={require('../../../assests/img/Filter_alt.png')}
-              style={styles.btnIcon}
-            />
-          </View>
-        </TouchableHighlight>
+        <View style={styles.bodyContainer}>
+          {/* <Text>Please enter query to search</Text> */}
+          <SessionCard />
+          <ClassCard />
+        </View>
       </View>
-      <View style={styles.btnGroup}>
-        <TouchableOpacity
-          key={'sessions'}
-          style={[
-            styles.btn,
-            btnSelected === 'sessions'
-              ? styles.selectedBtn
-              : styles.notSelectedBtn,
-          ]}
-          onPress={() => {
-            Alert.alert('Left button pressed');
-            setBtnSelected('sessions');
-          }}>
-          <Text
-            style={[
-              styles.buttonText,
-              btnSelected === 'sessions'
-                ? styles.btnTextSelected
-                : styles.btnTextNotSelected,
-            ]}>
-            SESSIONS
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          key={'classes'}
-          style={[
-            styles.btn,
-            btnSelected === 'classes'
-              ? styles.selectedBtn
-              : styles.notSelectedBtn,
-          ]}
-          onPress={() => {
-            Alert.alert('Right button pressed');
-            setBtnSelected('classes');
-          }}>
-          <Text
-            style={[
-              styles.buttonText,
-              btnSelected === 'classes'
-                ? styles.btnTextSelected
-                : styles.btnTextNotSelected,
-            ]}>
-            CLASSES
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.bodyContainer}>
-        {/* <Text>Please enter query to search</Text> */}
-        <SessionCard/>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -174,7 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    // borderWidth: 1,
+    gap: 24,
     height: 'auto',
     paddingHorizontal: myPadding.horizontal,
     paddingVertical: myPadding.vertical,

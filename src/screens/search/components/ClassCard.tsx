@@ -6,32 +6,55 @@ import Tag from './Tag';
 
 const ClassCard = () => {
   return (
-    <View>
-      <View style={styles.card}>
-        <Image
-          style={styles.img}
-          source={require('../../../assests/img/imgExample.png')}
-        />
-
-        <TouchableHighlight
-          style={[styles.iconBtn, styles.rightIconBtn]}
-          onPress={() => {
-            Alert.alert('Hi right');
-          }}>
-          <Image source={require('../../../assests/img/calendar_icon.png')} />
-        </TouchableHighlight>
-        <TouchableHighlight
-          style={[styles.iconBtn, styles.leftIconBtn]}
-          onPress={() => {
-            Alert.alert('Hi left');
-          }}>
-          <Image source={require('../../../assests/img/lock_bgblack.png')} />
-        </TouchableHighlight>
+    <View style={styles.card}>
+      <Image
+        style={styles.img}
+        source={require('../../../assests/img/classImgEx.jpg')}
+      />
+      {/* right icon btn */}
+      <TouchableHighlight
+        style={[styles.iconBtn, styles.rightIconBtn]}
+        onPress={() => {
+          Alert.alert('Hi right');
+        }}>
+        <Image source={require('../../../assests/img/calendar_icon.png')} />
+      </TouchableHighlight>
+      {/* left icon btn */}
+      <TouchableHighlight
+        style={[styles.iconBtn, styles.leftIconBtn]}
+        onPress={() => {
+          Alert.alert('Hi left');
+        }}>
+        <Image source={require('../../../assests/img/lock_bgblack.png')} />
+      </TouchableHighlight>
+      <View style={styles.infoCard}>
+        <View style={styles.flexRow}>
+          <Tag
+            text={'BEGINNER'}
+            textColor={'white'}
+            bgColor={'pink'}
+            size={11}
+          />
+          <Tag
+            text={'7 videos'}
+            textColor={'white'}
+            bgColor={'#B0B0B0'}
+            size={11}
+            style={styles.flexRow}>
+            <Image source={require('../../../assests/img/Video_light.png')} />
+          </Tag>
+        </View>
         <Text style={styles.text}>Name Dance</Text>
-      </View>
-      <View style={styles.flexRow}>
-        <Tag text={'BEGINNER'} textColor={'white'} bgColor={'pink'} size={11} />
-        <Tag text={'Dancer'} textColor={'white'} bgColor={'black'} size={11} />
+        <View style={styles.flexRow}>
+          <Tag text={'Type'} textColor={'white'} bgColor={'black'} size={11} />
+          <Tag
+            text={'Dancer'}
+            textColor={'white'}
+            bgColor={'black'}
+            size={11}
+            style={styles.flexRow}
+          />
+        </View>
       </View>
     </View>
   );
@@ -48,7 +71,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 'auto',
     opacity: 0.75,
-    aspectRatio: 10 / 16,
+    aspectRatio: 3 / 4,
   },
   iconBtn: {
     height: iconSize.md,
@@ -64,16 +87,19 @@ const styles = StyleSheet.create({
     left: 12,
   },
   text: {
-    position: 'absolute',
-    bottom: 16,
-    left: 10,
     color: 'white',
     fontWeight: 'semibold',
     fontSize: 15,
   },
+  infoCard: {
+    flexDirection: 'column',
+    gap: 8,
+    position: 'absolute',
+    bottom: 16,
+    left: 12,
+  },
   flexRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 8,
   },
 });

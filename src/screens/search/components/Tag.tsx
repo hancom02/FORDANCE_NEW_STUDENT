@@ -8,9 +8,11 @@ const Tag = ({
   weight = null,
   size = 15,
   style = {},
+  children = null,
 }) => {
   return (
     <View style={[styles.tag, {backgroundColor: bgColor}, style]}>
+      {children}
       <Text
         style={{color: textColor, fontWeight: weight ?? 600, fontSize: size}}>
         {text}
