@@ -10,6 +10,7 @@ import MyColor from '../constants/color';
 import LoginScreen from '../screens/login/views/login_screen';
 import SearchScreen from '../screens/search/views/search_screen';
 import FilterScreen from '../screens/search/views/filter_screen';
+import FavouriteScreen from '../screens/profile/views/FavouriteScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,7 @@ export default function Navigation() {
     <NavigationContainer>
       <Stack.Navigator id={undefined} screenOptions={{headerShown: false}}>
         <Stack.Screen name="SearchScreen" component={SearchScreen} />
+        <Stack.Screen name="FavouriteScreen" component={FavouriteScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
         <Stack.Screen name="ClassScreen" component={ClassScreen} />

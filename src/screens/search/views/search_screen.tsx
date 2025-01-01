@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   btnGroup: {
     paddingHorizontal: 25,
-    paddingVertical: myPadding.vertical,
+    marginVertical: myPadding.vertical,
     flexDirection: 'row',
     gap: 15,
   },
@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 24,
-    height: 'auto',
+    // height: 'auto',
     paddingHorizontal: myPadding.horizontal,
-    paddingVertical: myPadding.vertical,
+    // paddingVertical: myPadding.vertical,
   },
 });
