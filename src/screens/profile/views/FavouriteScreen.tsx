@@ -1,14 +1,29 @@
 import React from 'react';
-import {View, Text} from 'react-native';
-// import Title from '../../../components/Title';
+import {ScrollView, StyleSheet, View} from 'react-native';
+import Title from '../../../components/Title';
+import ClassCard from '../../search/components/ClassCard';
+import SessionCard from '../../search/components/SessionCard';
 
-const FavouriteScreen = ({}) => {
+const FavouriteScreen = ({navigation}) => {
   return (
-    <View>
-      {/* <Title navigation={navigation} title={'Favourite'} /> */}
-      <Text>hi</Text>
-    </View>
+    <ScrollView>
+      <View>
+        <Title navigation={navigation} title={'Favourite'} />
+        <View style={styles.container}>
+          <SessionCard />
+          <ClassCard />
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
 export default FavouriteScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    flexDirection: 'column',
+    gap: 24,
+  },
+});
