@@ -1,16 +1,21 @@
 // src/screens/HomeScreen.tsx
 
+import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet, Button} from 'react-native';
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View>
         <Text style={styles.text}>HOME SCREEN</Text>
+        <Button
+          title="Go to SearchScreen"
+          onPress={() => navigation.navigate('SearchScreen')}
+        />
       </View>
     </View>
-    
   );
 };
 
