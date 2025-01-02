@@ -1,95 +1,182 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  View,
-  TouchableHighlight,
-  Image,
+  Alert,
+  ScrollView,
   StyleSheet,
   Text,
-  ScrollView,
   TouchableOpacity,
-  Alert,
+  View,
 } from 'react-native';
-import {appFontSize, commonStyle, iconSize} from '../../../constants/common';
 import MyColor from '../../../constants/color';
+import {appFontSize, commonStyle, iconSize} from '../../../constants/common';
+import {
+  LIST_GENRES,
+  LIST_LEVELS,
+  type Filter,
+} from '../../../constants/filter';
 import Tag from '../components/Tag';
+import {searchServices} from '../../../service/search/searchServices';
 
-const FilterScreen = ({navigation}) => {
+type Props = {
+  show: boolean;
+  onClose: () => void;
+  onSelect: (value: Filter) => void;
+};
+const FilterScreen = (props: Props) => {
+  const [listIns, setListIns] = useState([]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const {data, error} = await searchServices.getListIns();
+        if (error) {
+          throw new Error(error.message);
+        }
+        setListIns(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  const [filter, setFilter] = useState<Filter>({
+    levels: [],
+    genres: [],
+    listIns: [],
+    listLengths: [],
+  });
+  const selectedIndex = (value: string, nameList: string) => {
+    if (filter[nameList]) {
+      return filter[nameList].indexOf(value);
+    } else {
+      return -1;
+    }
+  };
+  function listChange(value: string, nameList: string) {
+    // const newFilter = [...filter[nameList]];
+    const newFilter = [...(filter[nameList] ?? [])];
+    const index = selectedIndex(value, nameList);
+    if (index > -1) {
+      newFilter.splice(index, 1);
+    } else {
+      newFilter.push(value);
+    }
+    setFilter({...filter, [nameList]: [...newFilter]});
+  }
+
+  // const genreSelectedIndex = (value: string) => filter.genres.indexOf(value);
+  // function genreChange(value: string) {
+  //   const newFilter = [...filter.genres];
+  //   const index = genreSelectedIndex(value);
+  //   if (index > -1) {
+  //     newFilter.splice(index, 1);
+  //   } else {
+  //     newFilter.push(value);
+  //   }
+  //   setFilter({...filter, genres: [...newFilter]});
+  // }
+
+  const insSelectedIndex = (value: string) => {
+    if (filter.listIns) {
+      const index = filter.listIns.findIndex(item => item.id === value);
+      return index;
+    }
+    return -1;
+  };
+  function insChange(ins: {id: string; name: string}) {
+    const newFilter = [...filter.listIns];
+    const index = insSelectedIndex(ins.id);
+    if (index > -1) {
+      newFilter.splice(index, 1);
+    } else {
+      newFilter.push(ins);
+    }
+    setFilter({...filter, listIns: [...newFilter]});
+  }
+
   return (
-    <ScrollView>
-      <View>
-        <View style={styles.title}>
-          {/* icon button */}
-          <TouchableHighlight
-            onPress={() => navigation.navigate('SearchScreen')}>
-            <View>
-              <Image
-                source={require('../../../assests/img/Arrow_left.png')}
-                style={styles.btnIcon}
-              />
+    <>
+      {props.show && (
+        <ScrollView style={styles.scrollView}>
+          <View>
+            <View style={styles.title}>
+              <Text style={styles.text}>Filter</Text>
             </View>
-          </TouchableHighlight>
-          <Text style={styles.text}>Filter</Text>
-        </View>
-        <View style={styles.mainContainer}>
-          <View style={styles.flexRow}>
-            <Tag text={'SESSIONS'} style={commonStyle.borderStyle} />
-            <Tag text={'CLASSES'} style={commonStyle.borderStyle} />
-          </View>
-          <Text style={styles.text}>Level</Text>
-          <View style={styles.flexRow}>
-            <Tag text={'BEGINNER'} style={commonStyle.borderStyle} />
-            <Tag text={'INTERMEDIATE'} style={commonStyle.borderStyle} />
-            <Tag text={'ADVANCED'} style={commonStyle.borderStyle} />
-          </View>
-          <Text style={styles.text}>Styles</Text>
-          <View style={styles.flexRow}>
-            <Tag text={'BALLET'} style={commonStyle.borderStyle} />
-            <Tag text={'BREAKING/B-BOYING'} style={commonStyle.borderStyle} />
-            <Tag text={'CONTEMPORARY'} style={commonStyle.borderStyle} />
-            <Tag text={'DANCE WORKOUT'} style={commonStyle.borderStyle} />
-            <Tag text={'DANCEHALL'} style={commonStyle.borderStyle} />
-            <Tag text={'HEELS'} style={commonStyle.borderStyle} />
-            <Tag text={'HIPHOP'} style={commonStyle.borderStyle} />
-            <Tag text={'HOUSE'} style={commonStyle.borderStyle} />
-            <Tag text={'JAZZ'} style={commonStyle.borderStyle} />
-            <Tag text={'JAZZ FUNK'} style={commonStyle.borderStyle} />
-            <Tag text={'K-POP'} style={commonStyle.borderStyle} />
-            <Tag text={'KRUMP'} style={commonStyle.borderStyle} />
-            <Tag text={'LOCKING'} style={commonStyle.borderStyle} />
-            <Tag text={'KRUMP'} style={commonStyle.borderStyle} />
-            <Tag text={'OPEN STYLE'} style={commonStyle.borderStyle} />
-          </View>
-          <Text style={styles.text}>Type</Text>
-          <View style={styles.flexRow}>
-            <Tag text={'BARE'} style={commonStyle.borderStyle} />
-            <Tag text={'CENTER'} style={commonStyle.borderStyle} />
-          </View>
-          <Text style={styles.text}>Length</Text>
-          <View style={styles.flexRow}>
-            <Tag text={'20 MIN OR LESS'} style={commonStyle.borderStyle} />
-            <Tag text={'20 - 50 MIN'} style={commonStyle.borderStyle} />
-          </View>
-          <Text style={styles.text}>Instructors</Text>
-          <View style={styles.flexRow}>
-            <Tag text={'ABEY'} style={commonStyle.borderStyle} />
-            <Tag text={'AUBREY ARES'} style={commonStyle.borderStyle} />
-          </View>
-          <TouchableOpacity
-            key={'sessions'}
-            style={styles.btn}
-            onPress={() => {
-              Alert.alert('Left button pressed');
-            }}>
-            <Text style={styles.buttonText}>SHOW RESULTS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <View>
-              <Text style={styles.btnClear}>CLEAR ALL</Text>
+            <View style={styles.mainContainer}>
+              <Text style={styles.text}>Level</Text>
+              <View style={styles.flexRow}>
+                {LIST_LEVELS.map((level, index) => {
+                  return (
+                    <Tag
+                      selected={selectedIndex(level, 'levels') > -1}
+                      onClick={() => {
+                        listChange(level, 'levels');
+                      }}
+                      key={index}
+                      text={level.toUpperCase()}
+                      style={commonStyle.borderStyle}
+                    />
+                  );
+                })}
+              </View>
+              <Text style={styles.text}>Styles</Text>
+              <View style={styles.flexRow}>
+                {LIST_GENRES.map((genre, index) => {
+                  return (
+                    <Tag
+                      selected={selectedIndex(genre, 'genres') > -1}
+                      onClick={() => {
+                        listChange(genre, 'genres');
+                      }}
+                      key={index}
+                      text={genre.toUpperCase()}
+                      style={commonStyle.borderStyle}
+                    />
+                  );
+                })}
+              </View>
+              <Text style={styles.text}>Instructors</Text>
+              <View style={styles.flexRow}>
+                {listIns.map(ins => {
+                  return (
+                    <Tag
+                      selected={insSelectedIndex(ins.id) > -1}
+                      onClick={() => {
+                        insChange(ins);
+                      }}
+                      key={ins.id}
+                      text={ins.name.toUpperCase()}
+                      style={commonStyle.borderStyle}
+                    />
+                  );
+                })}
+              </View>
+              <TouchableOpacity
+                key={'sessions'}
+                style={styles.btn}
+                onPress={() => {
+                  console.log({filter: filter.levels});
+                  props.onSelect(filter);
+                  props.onClose();
+                  Alert.alert('Left button pressed');
+                }}>
+                <Text style={styles.buttonText}>SHOW RESULTS</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  props.onClose();
+                }}>
+                <View>
+                  <Text style={styles.btnClear}>Cancel</Text>
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+          </View>
+        </ScrollView>
+      )}
+    </>
   );
 };
 
@@ -101,6 +188,13 @@ const myPadding = {
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    zIndex: 99,
+    backgroundColor: '#FFFFFF',
+  },
   title: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -151,7 +245,7 @@ const styles = StyleSheet.create({
   },
   btnClear: {
     color: 'black',
-    fontSize: 10,
+    fontSize: 15,
     fontWeight: 900,
     lineHeight: 15,
     fontFamily: 'Poppins',

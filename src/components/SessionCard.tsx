@@ -3,15 +3,18 @@ import {Image, View, TouchableHighlight, Alert, Text} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {iconSize} from '../constants/common';
 import Tag from '../screens/search/components/Tag';
+import MyColor from '../constants/color';
 
 const SessionCard = ({
   linkImg = require('../assests/img/imgExample.png'),
   name = 'Name Dance',
   level = 'BEGINNER',
   genre = 'Dancer',
+  nameIns = 'Name Instructor',
 }) => {
   return (
     <View style={styles.container}>
+      {/* img card */}
       <View style={styles.card}>
         <Image style={styles.img} source={linkImg} />
 
@@ -31,9 +34,16 @@ const SessionCard = ({
         </TouchableHighlight>
         <Text style={styles.text}>{name}</Text>
       </View>
+      {/* bottom tags */}
       <View style={styles.flexRow}>
         <Tag text={level} textColor={'white'} bgColor={'pink'} size={11} />
         <Tag text={genre} textColor={'white'} bgColor={'black'} size={11} />
+        <Tag
+          text={nameIns}
+          textColor={'white'}
+          bgColor={MyColor.primary}
+          size={11}
+        />
       </View>
     </View>
   );

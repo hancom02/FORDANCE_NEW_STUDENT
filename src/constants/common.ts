@@ -11,6 +11,11 @@ export const appFontSize = 13;
 
 export const ITEMS_PER_PAGE = 10;
 
+export const myPadding = {
+  horizontal: 13,
+  vertical: 16,
+};
+
 export const commonStyle = StyleSheet.create({
   borderStyle: {
     borderWidth: 1,

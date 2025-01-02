@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
@@ -11,23 +11,24 @@ import {
   View,
 } from 'react-native';
 import MyColor from '../../../constants/color';
-import {ITEMS_PER_PAGE, appFontSize, iconSize} from '../../../constants/common';
+import {appFontSize, iconSize, myPadding} from '../../../constants/common';
 import {searchServices} from '../../../service/search/searchServices';
 // import ClassCard from '../components/ClassCard';
 import SessionCard from '../../../components/SessionCard';
-
-export default function SearchScreen({navigation}) {
+import {type Filter} from '../../../constants/filter';
+import FilterScreen from './filter_screen';
+export default function SearchScreen({}) {
   const [btnSelected, setBtnSelected] = useState('sessions');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
+  const [filter, setFilter] = useState<Filter | null>(null);
 
-  const fetchData = async (pageNumber, query) => {
-    const {data, error} = await searchServices.searchSessionName(
-      query,
-      pageNumber,
-    );
+  const fetchData = async (query?: string) => {
+    const {data, error} = await searchServices.searchSessionName({
+      filter: filter,
+      textSearch: query,
+    });
     if (error) {
       console.error('Error searching data:', error.message);
       return;
@@ -35,33 +36,32 @@ export default function SearchScreen({navigation}) {
 
     setSearchResults(data);
 
-    const count = await searchServices.totalPages;
+    // const count = await searchServices.totalPages;
 
-    const totalItems = count ?? 0;
-    const totalPage = Math.ceil((totalItems as number) / ITEMS_PER_PAGE);
-    setTotalPages(totalPage);
+    // const totalItems = count ?? 0;
+    // const totalPage = Math.ceil((totalItems as number) / ITEMS_PER_PAGE);
+    // setTotalPages(totalPage);
   };
 
   const handleSearch = () => {
-    setPage(1); // Reset page to 1 when performing a new search
-    fetchData(1, searchQuery);
+    fetchData(searchQuery);
   };
   const handleSearchSubmit = () => {
     handleSearch();
   };
 
   useEffect(() => {
-    fetchData(page, searchQuery);
-  }, [page, searchQuery]);
+    fetchData();
+  }, [filter]);
 
-  const handleLoadMore = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    }
-  };
+  // const handleLoadMore = () => {
+  //   if (page < totalPages) {
+  //     setPage(page + 1);
+  //   }
+  // };
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.searchContainer}>
         {/* icon button */}
         <TouchableHighlight>
@@ -88,7 +88,10 @@ export default function SearchScreen({navigation}) {
         </View>
 
         {/* icon button */}
-        <TouchableHighlight onPress={() => navigation.navigate('FilterScreen')}>
+        <TouchableHighlight
+          onPress={() => {
+            setShowFilter(true);
+          }}>
           <View>
             <Image
               source={require('../../../assests/img/Filter_alt.png')}
@@ -98,6 +101,7 @@ export default function SearchScreen({navigation}) {
         </TouchableHighlight>
       </View>
       <View style={styles.btnGroup}>
+        {/* sessions btn */}
         <TouchableOpacity
           key={'sessions'}
           style={[
@@ -120,6 +124,7 @@ export default function SearchScreen({navigation}) {
             SESSIONS
           </Text>
         </TouchableOpacity>
+        {/* classes */}
         <TouchableOpacity
           key={'classes'}
           style={[
@@ -143,40 +148,38 @@ export default function SearchScreen({navigation}) {
           </Text>
         </TouchableOpacity>
       </View>
-      {searchQuery ? (
-        <FlatList
-          style={styles.flatList}
-          data={searchResults}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
-            <SessionCard
-              linkImg={{uri: item.thumbnail_url}}
-              name={item.session_name}
-              level={item.level}
-              genre={item.genre}
-            />
-          )}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.1}
-        />
-      ) : (
-        <View style={styles.bodyContainer}>
-          <Text>Please enter a query to search</Text>
-        </View>
-      )}
-
+      <FlatList
+        style={styles.flatList}
+        data={searchResults}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({item}) => (
+          <SessionCard
+            linkImg={{uri: item.thumbnail_url}}
+            name={item.session_name}
+            level={item.level}
+            genre={item.genre}
+          />
+        )}
+        // onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
+      />
       {/* <SessionCard /> */}
       {/* <ClassCard /> */}
+      <FilterScreen
+        show={showFilter}
+        onClose={() => {
+          setShowFilter(false);
+        }}
+        onSelect={value => {
+          setFilter(value);
+        }}
+      />
     </View>
   );
 }
 
-const myPadding = {
-  horizontal: 13,
-  vertical: 16,
-};
-
 const styles = StyleSheet.create({
+  container: {position: 'relative', width: '100%', height: '100%'},
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

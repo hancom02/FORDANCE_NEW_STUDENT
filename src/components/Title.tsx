@@ -3,18 +3,21 @@ import {Image, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import MyColor from '../constants/color';
 import {iconSize} from '../constants/common';
 
-const Title = ({navigation, title}) => {
+const Title = ({navigation, title, iconBtn = true}) => {
   return (
     <View style={styles.title}>
       {/* icon button */}
-      <TouchableHighlight onPress={() => navigation.navigate('SearchScreen')}>
-        <View>
-          <Image
-            source={require('../assests/img/Arrow_left.png')}
-            style={styles.btnIcon}
-          />
-        </View>
-      </TouchableHighlight>
+      {iconBtn ? (
+        <TouchableHighlight onPress={() => navigation.navigate('SearchScreen')}>
+          <View>
+            <Image
+              source={require('../assests/img/Arrow_left.png')}
+              style={styles.btnIcon}
+            />
+          </View>
+        </TouchableHighlight>
+      ) : null}
+
       <Text style={styles.text}>{title}</Text>
     </View>
   );
@@ -44,7 +47,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'Poppins',
-    fontWeight: 600,
+    fontWeight: 800,
     fontSize: 20,
     lineHeight: 30,
     margin: 'auto',

@@ -42,10 +42,10 @@ export default function Navigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator id={undefined} screenOptions={{headerShown: false}}>
-      <Stack.Screen name="SearchScreen" component={SearchScreen} />
-        <Stack.Screen name="FavouriteScreen" component={FavouriteScreen} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="SearchScreen" component={SearchScreen} />
+        <Stack.Screen name="FavouriteScreen" component={FavouriteScreen} />
         <Stack.Screen name="ClassScreen" component={ClassScreen} />
         <Stack.Screen name="LessionScreen" component={LessionScreen} />
         <Stack.Screen name="FilterScreen" component={FilterScreen} />
