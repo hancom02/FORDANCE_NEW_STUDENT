@@ -63,7 +63,10 @@ const HomeScreen = ({navigation}) => {
       {/* title */}
       <Title iconBtn={false} navigation={navigation} title={'HOME'} />
       {/* TABS */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        horizontal
+        showsHorizontalScrollIndicator={false}>
         <View style={styles.tabs}>
           {LIST_TAB.map((tab, index) => {
             return (
@@ -108,8 +111,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 24,
   },
+  scrollView: {height: '10%'},
   tabs: {
-    marginTop: 12,
+    // height: '100%',
+    // marginTop: 12,
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 13,
