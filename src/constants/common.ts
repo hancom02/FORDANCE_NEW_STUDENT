@@ -9,6 +9,8 @@ export const iconSize = {
 };
 export const appFontSize = 13;
 
+export const ITEMS_PER_PAGE = 10;
+
 export const commonStyle = StyleSheet.create({
   borderStyle: {
     borderWidth: 1,

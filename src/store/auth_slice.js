@@ -1,10 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { supabase } from '../supabase_config/supabase';
-import bcrypt from 'bcryptjs';
-import { Alert } from 'react-native';
 
 export const useAuth = create(
   persist(

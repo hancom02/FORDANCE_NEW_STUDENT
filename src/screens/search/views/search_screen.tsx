@@ -1,111 +1,173 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  View,
+  Alert,
+  FlatList,
   Image,
-  TextInput,
+  StyleSheet,
   Text,
+  TextInput,
   TouchableHighlight,
   TouchableOpacity,
-  Alert,
-  ScrollView,
+  View,
 } from 'react-native';
-import {appFontSize, iconSize} from '../../../constants/common';
-import {StyleSheet} from 'react-native';
 import MyColor from '../../../constants/color';
-import SessionCard from '../components/SessionCard';
-import ClassCard from '../components/ClassCard';
+import {ITEMS_PER_PAGE, appFontSize, iconSize} from '../../../constants/common';
+import {searchServices} from '../../../service/search/searchServices';
+// import ClassCard from '../components/ClassCard';
+import SessionCard from '../../../components/SessionCard';
 
 export default function SearchScreen({navigation}) {
-  // const navigation = useNavigation();
   const [btnSelected, setBtnSelected] = useState('sessions');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchData = async (pageNumber, query) => {
+    const {data, error} = await searchServices.searchSessionName(
+      query,
+      pageNumber,
+    );
+    if (error) {
+      console.error('Error searching data:', error.message);
+      return;
+    }
+
+    setSearchResults(data);
+
+    const count = await searchServices.totalPages;
+
+    const totalItems = count ?? 0;
+    const totalPage = Math.ceil((totalItems as number) / ITEMS_PER_PAGE);
+    setTotalPages(totalPage);
+  };
+
+  const handleSearch = () => {
+    setPage(1); // Reset page to 1 when performing a new search
+    fetchData(1, searchQuery);
+  };
+  const handleSearchSubmit = () => {
+    handleSearch();
+  };
+
+  useEffect(() => {
+    fetchData(page, searchQuery);
+  }, [page, searchQuery]);
+
+  const handleLoadMore = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
 
   return (
-    <ScrollView>
-      <View>
-        <View style={styles.mainInputContainer}>
-          {/* icon button */}
-          <TouchableHighlight>
-            <View>
-              <Image
-                source={require('../../../assests/img/Arrow_left.png')}
-                style={styles.btnIcon}
-              />
-            </View>
-          </TouchableHighlight>
-          {/* search input */}
-          <View style={styles.inputWrapper}>
+    <View>
+      <View style={styles.searchContainer}>
+        {/* icon button */}
+        <TouchableHighlight>
+          <View>
             <Image
-              source={require('../../../assests/img/icon.png')}
-              style={styles.logo}
+              source={require('../../../assests/img/Arrow_left.png')}
+              style={styles.btnIcon}
             />
-            <TextInput style={styles.textInput} placeholder="Search" />
           </View>
-
-          {/* icon button */}
-          <TouchableHighlight
-            onPress={() => navigation.navigate('FilterScreen')}>
-            <View>
-              <Image
-                source={require('../../../assests/img/Filter_alt.png')}
-                style={styles.btnIcon}
-              />
-            </View>
-          </TouchableHighlight>
-        </View>
-        <View style={styles.btnGroup}>
-          <TouchableOpacity
-            key={'sessions'}
-            style={[
-              styles.btn,
-              btnSelected === 'sessions'
-                ? styles.selectedBtn
-                : styles.notSelectedBtn,
-            ]}
-            onPress={() => {
-              Alert.alert('Left button pressed');
-              setBtnSelected('sessions');
-            }}>
-            <Text
-              style={[
-                styles.buttonText,
-                btnSelected === 'sessions'
-                  ? styles.btnTextSelected
-                  : styles.btnTextNotSelected,
-              ]}>
-              SESSIONS
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            key={'classes'}
-            style={[
-              styles.btn,
-              btnSelected === 'classes'
-                ? styles.selectedBtn
-                : styles.notSelectedBtn,
-            ]}
-            onPress={() => {
-              Alert.alert('Right button pressed');
-              setBtnSelected('classes');
-            }}>
-            <Text
-              style={[
-                styles.buttonText,
-                btnSelected === 'classes'
-                  ? styles.btnTextSelected
-                  : styles.btnTextNotSelected,
-              ]}>
-              CLASSES
-            </Text>
-          </TouchableOpacity>
+        </TouchableHighlight>
+        {/* search input */}
+        <View style={styles.inputWrapper}>
+          <Image
+            source={require('../../../assests/img/icon.png')}
+            style={styles.logo}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Search"
+            value={searchQuery}
+            onChangeText={text => setSearchQuery(text)}
+            onSubmitEditing={handleSearchSubmit}
+          />
         </View>
 
-        <View style={styles.bodyContainer}>
-          {/* <Text>Please enter query to search</Text> */}
-          <SessionCard />
-          <ClassCard />
-        </View>
+        {/* icon button */}
+        <TouchableHighlight onPress={() => navigation.navigate('FilterScreen')}>
+          <View>
+            <Image
+              source={require('../../../assests/img/Filter_alt.png')}
+              style={styles.btnIcon}
+            />
+          </View>
+        </TouchableHighlight>
       </View>
-    </ScrollView>
+      <View style={styles.btnGroup}>
+        <TouchableOpacity
+          key={'sessions'}
+          style={[
+            styles.btn,
+            btnSelected === 'sessions'
+              ? styles.selectedBtn
+              : styles.notSelectedBtn,
+          ]}
+          onPress={() => {
+            Alert.alert('Left button pressed');
+            setBtnSelected('sessions');
+          }}>
+          <Text
+            style={[
+              styles.buttonText,
+              btnSelected === 'sessions'
+                ? styles.btnTextSelected
+                : styles.btnTextNotSelected,
+            ]}>
+            SESSIONS
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          key={'classes'}
+          style={[
+            styles.btn,
+            btnSelected === 'classes'
+              ? styles.selectedBtn
+              : styles.notSelectedBtn,
+          ]}
+          onPress={() => {
+            Alert.alert('Right button pressed');
+            setBtnSelected('classes');
+          }}>
+          <Text
+            style={[
+              styles.buttonText,
+              btnSelected === 'classes'
+                ? styles.btnTextSelected
+                : styles.btnTextNotSelected,
+            ]}>
+            CLASSES
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {searchQuery ? (
+        <FlatList
+          style={styles.flatList}
+          data={searchResults}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item}) => (
+            <SessionCard
+              linkImg={{uri: item.thumbnail_url}}
+              name={item.session_name}
+              level={item.level}
+              genre={item.genre}
+            />
+          )}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.1}
+        />
+      ) : (
+        <View style={styles.bodyContainer}>
+          <Text>Please enter a query to search</Text>
+        </View>
+      )}
+
+      {/* <SessionCard /> */}
+      {/* <ClassCard /> */}
+    </View>
   );
 }
 
@@ -115,7 +177,7 @@ const myPadding = {
 };
 
 const styles = StyleSheet.create({
-  mainInputContainer: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -185,5 +247,9 @@ const styles = StyleSheet.create({
     // height: 'auto',
     paddingHorizontal: myPadding.horizontal,
     // paddingVertical: myPadding.vertical,
+  },
+  flatList: {
+    marginBottom: 100,
+    // paddingBottom: 500,
   },
 });

@@ -1,8 +1,8 @@
 import React from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import Title from '../../../components/Title';
-import ClassCard from '../../search/components/ClassCard';
-import SessionCard from '../../search/components/SessionCard';
+import ClassCard from '../../../components/ClassCard';
+import SessionCard from '../../../components/SessionCard';
 
 const FavouriteScreen = ({navigation}) => {
   return (

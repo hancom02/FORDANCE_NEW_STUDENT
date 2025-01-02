@@ -1,15 +1,15 @@
 import React from 'react';
 import {Image, View, TouchableHighlight, Alert, Text} from 'react-native';
 import {StyleSheet} from 'react-native';
-import {iconSize} from '../../../constants/common';
-import Tag from './Tag';
+import {iconSize} from '../constants/common';
+import Tag from '../screens/search/components/Tag';
 
 const ClassCard = () => {
   return (
     <View style={styles.card}>
       <Image
         style={styles.img}
-        source={require('../../../assests/img/classImgEx.jpg')}
+        source={require('../assests/img/classImgEx.jpg')}
       />
       {/* right icon btn */}
       <TouchableHighlight
@@ -17,7 +17,7 @@ const ClassCard = () => {
         onPress={() => {
           Alert.alert('Hi right');
         }}>
-        <Image source={require('../../../assests/img/calendar_icon.png')} />
+        <Image source={require('../assests/img/calendar_icon.png')} />
       </TouchableHighlight>
       {/* left icon btn */}
       <TouchableHighlight
@@ -25,7 +25,7 @@ const ClassCard = () => {
         onPress={() => {
           Alert.alert('Hi left');
         }}>
-        <Image source={require('../../../assests/img/lock_bgblack.png')} />
+        <Image source={require('../assests/img/lock_bgblack.png')} />
       </TouchableHighlight>
       <View style={styles.infoCard}>
         <View style={styles.flexRow}>
@@ -41,7 +41,7 @@ const ClassCard = () => {
             bgColor={'#B0B0B0'}
             size={11}
             style={styles.flexRow}>
-            <Image source={require('../../../assests/img/Video_light.png')} />
+            <Image source={require('../assests/img/Video_light.png')} />
           </Tag>
         </View>
         <Text style={styles.text}>Name Dance</Text>

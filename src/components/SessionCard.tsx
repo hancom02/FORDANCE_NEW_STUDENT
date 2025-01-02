@@ -1,43 +1,49 @@
 import React from 'react';
 import {Image, View, TouchableHighlight, Alert, Text} from 'react-native';
 import {StyleSheet} from 'react-native';
-import {iconSize} from '../../../constants/common';
-import Tag from './Tag';
+import {iconSize} from '../constants/common';
+import Tag from '../screens/search/components/Tag';
 
-const SessionCard = () => {
+const SessionCard = ({
+  linkImg = require('../assests/img/imgExample.png'),
+  name = 'Name Dance',
+  level = 'BEGINNER',
+  genre = 'Dancer',
+}) => {
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.card}>
-        <Image
-          style={styles.img}
-          source={require('../../../assests/img/imgExample.png')}
-        />
+        <Image style={styles.img} source={linkImg} />
 
         <TouchableHighlight
           style={[styles.iconBtn, styles.rightIconBtn]}
           onPress={() => {
             Alert.alert('Hi right');
           }}>
-          <Image source={require('../../../assests/img/calendar_icon.png')} />
+          <Image source={require('../assests/img/calendar_icon.png')} />
         </TouchableHighlight>
         <TouchableHighlight
           style={[styles.iconBtn, styles.leftIconBtn]}
           onPress={() => {
             Alert.alert('Hi left');
           }}>
-          <Image source={require('../../../assests/img/lock_bgblack.png')} />
+          <Image source={require('../assests/img/lock_bgblack.png')} />
         </TouchableHighlight>
-        <Text style={styles.text}>Name Dance</Text>
+        <Text style={styles.text}>{name}</Text>
       </View>
       <View style={styles.flexRow}>
-        <Tag text={'BEGINNER'} textColor={'white'} bgColor={'pink'} size={11} />
-        <Tag text={'Dancer'} textColor={'white'} bgColor={'black'} size={11} />
+        <Tag text={level} textColor={'white'} bgColor={'pink'} size={11} />
+        <Tag text={genre} textColor={'white'} bgColor={'black'} size={11} />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 16,
+    marginVertical: 12,
+  },
   card: {
     position: 'relative',
   },
