@@ -2,12 +2,17 @@ import React from 'react';
 import {FlatList} from 'react-native';
 import SessionCard from './SessionCard';
 import {StyleSheet} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const ListSessions = ({searchResults, listIns}) => {
+  const navigation = useNavigation();
   const getNameById = (id, list) => {
     const foundItem = list.find(item => item.id === id);
     return foundItem ? foundItem.name : null;
   };
+  const handleNavSession = (session_id: string) => {
+    navigation.navigate('LessionScreen', {session_id});
+  }
   return (
     <FlatList
       style={styles.flatList}
@@ -15,11 +20,14 @@ const ListSessions = ({searchResults, listIns}) => {
       keyExtractor={item => item.id.toString()}
       renderItem={({item}) => (
         <SessionCard
+        session_id={item.id}
           linkImg={{uri: item.thumbnail_url}}
+          price={item.price}
           name={item.session_name}
           level={item.level}
           genre={item.genre}
           nameIns={getNameById(item.instructor_id, listIns)}
+          onPress={() => handleNavSession(item.id)}
         />
       )}
       // onEndReached={handleLoadMore}

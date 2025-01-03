@@ -9,6 +9,8 @@ export const useAuth = create(
   persist(
     immer((set) => ({
       isLogin: undefined, 
+      uuid: '',
+      username: '',
       email: '',
       error: undefined,
       signIn: async (email, password) => {
@@ -49,6 +51,8 @@ export const useAuth = create(
             }      
             set((state) => {
               state.isLogin = true;
+              state.uuid = authData.user.id;
+              state.username = getUserData[0].username;
               state.email = authData.user.email;
             });      
           } else {
