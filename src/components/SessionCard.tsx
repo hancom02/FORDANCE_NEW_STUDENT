@@ -33,11 +33,13 @@ const SessionCard = ({
           <Image source={require('../assests/img/lock_bgblack.png')} />
         </TouchableHighlight>
         <Text style={styles.text}>{name}</Text>
+        {/* <Tag text={name} textColor={'white'} bgColor={'black'} size={15} /> */}
       </View>
       {/* bottom tags */}
       <View style={styles.flexRow}>
         <Tag text={level} textColor={'white'} bgColor={'pink'} size={11} />
         <Tag text={genre} textColor={'white'} bgColor={'black'} size={11} />
+
         <Tag
           text={nameIns}
           textColor={'white'}
@@ -82,6 +84,10 @@ const styles = StyleSheet.create({
     bottom: 16,
     left: 10,
     color: 'white',
+    backgroundColor: 'black',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
     fontWeight: 'semibold',
     fontSize: 15,
   },

@@ -4,13 +4,18 @@ import {StyleSheet} from 'react-native';
 import {iconSize} from '../constants/common';
 import Tag from '../screens/search/components/Tag';
 
-const ClassCard = () => {
+const ClassCard = ({
+  linkImg = require('../assests/img/classImgEx.jpg'),
+  name = 'Name Dance',
+  level = 'BEGINNER',
+  genre = 'Dancer',
+  nameIns = 'Name Instructor',
+  count = 7,
+}) => {
   return (
     <View style={styles.card}>
-      <Image
-        style={styles.img}
-        source={require('../assests/img/classImgEx.jpg')}
-      />
+      {/* img */}
+      <Image style={styles.img} source={linkImg} />
       {/* right icon btn */}
       <TouchableHighlight
         style={[styles.iconBtn, styles.rightIconBtn]}
@@ -27,16 +32,12 @@ const ClassCard = () => {
         }}>
         <Image source={require('../assests/img/lock_bgblack.png')} />
       </TouchableHighlight>
+      {/* tags */}
       <View style={styles.infoCard}>
         <View style={styles.flexRow}>
+          <Tag text={level} textColor={'white'} bgColor={'pink'} size={11} />
           <Tag
-            text={'BEGINNER'}
-            textColor={'white'}
-            bgColor={'pink'}
-            size={11}
-          />
-          <Tag
-            text={'7 videos'}
+            text={count + ' videos'}
             textColor={'white'}
             bgColor={'#B0B0B0'}
             size={11}
@@ -44,11 +45,11 @@ const ClassCard = () => {
             <Image source={require('../assests/img/Video_light.png')} />
           </Tag>
         </View>
-        <Text style={styles.text}>Name Dance</Text>
+        <Text style={styles.text}>{name}</Text>
         <View style={styles.flexRow}>
-          <Tag text={'Type'} textColor={'white'} bgColor={'black'} size={11} />
+          <Tag text={genre} textColor={'white'} bgColor={'black'} size={11} />
           <Tag
-            text={'Dancer'}
+            text={nameIns}
             textColor={'white'}
             bgColor={'black'}
             size={11}
@@ -65,6 +66,8 @@ export default ClassCard;
 const styles = StyleSheet.create({
   card: {
     position: 'relative',
+    marginHorizontal: 16,
+    marginVertical: 12,
   },
   img: {
     borderRadius: 10,
@@ -88,8 +91,12 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
+    backgroundColor: 'black',
     fontWeight: 'semibold',
     fontSize: 15,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   infoCard: {
     flexDirection: 'column',

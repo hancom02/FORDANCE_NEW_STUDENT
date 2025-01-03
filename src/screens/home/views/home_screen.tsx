@@ -1,8 +1,7 @@
 // src/screens/HomeScreen.tsx
 import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
-// import ClassCard from '../../../components/ClassCard';
-// import SessionCard from '../../../components/SessionCard';
+import ListClasses from '../../../components/ListClasses';
 import ListSessions from '../../../components/ListSessions';
 import Search from '../../../components/Search';
 import Title from '../../../components/Title';
@@ -11,9 +10,10 @@ import {type Filter} from '../../../constants/filter';
 import {searchServices} from '../../../service/search/searchServices';
 import Tag from '../../search/components/Tag';
 import FilterScreen from '../../search/views/filter_screen';
+import ListInstructor from '../../../components/ListInstructor';
 
 const HomeScreen = ({navigation}) => {
-  const LIST_TAB = ['SESSIONS', 'CLASSES', 'CATEGORIES', 'INSTRUCTORS'];
+  const LIST_TAB = ['SESSIONS', 'CLASSES', 'INSTRUCTORS'];
   const [selectedTab, setSelectedTab] = useState('SESSIONS');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -26,12 +26,42 @@ const HomeScreen = ({navigation}) => {
   };
 
   const fetchData = async (query?: string) => {
-    const {data, error} = await searchServices.searchSessionName({
-      filter: filter,
-      textSearch: query,
-    });
+    let data = [];
+    let error = '';
+    switch (selectedTab) {
+      case 'SESSIONS':
+        try {
+          const result = await searchServices.searchSessionName({
+            filter: filter,
+            textSearch: query,
+          });
+          data = result.data;
+          error = result.error;
+        } catch (error) {
+          console.error('Error searching data:', error.message);
+          return;
+        }
+
+        break;
+      case 'CLASSES':
+        try {
+          const result = await searchServices.searchClassName({
+            filter: filter,
+            textSearch: query,
+          });
+          data = result.data;
+          error = result.error;
+        } catch (error) {
+          console.error('Error searching data:', error.message);
+          return;
+        }
+        break;
+      // default:
+      // statusMessage = 'User status is unknown';
+    }
+
     if (error) {
-      console.error('Error searching data:', error.message);
+      console.error('Error searching data:', error);
       return;
     }
 
@@ -41,7 +71,7 @@ const HomeScreen = ({navigation}) => {
 
   useEffect(() => {
     fetchData();
-  }, [filter]);
+  }, [filter, selectedTab]);
 
   useEffect(() => {
     const getListInsData = async () => {
@@ -100,7 +130,13 @@ const HomeScreen = ({navigation}) => {
         }}
       />
       {/* LIST CARD RESULT */}
-      <ListSessions searchResults={searchResults} listIns={listIns} />
+      {selectedTab === LIST_TAB[0] ? (
+        <ListSessions searchResults={searchResults} listIns={listIns} />
+      ) : selectedTab === LIST_TAB[1] ? (
+        <ListClasses searchResults={searchResults} />
+      ) : (
+        <ListInstructor listIns={listIns} />
+      )}
     </View>
   );
 };
