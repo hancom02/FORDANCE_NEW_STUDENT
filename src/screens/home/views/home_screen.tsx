@@ -63,6 +63,8 @@ const HomeScreen = ({navigation}) => {
           });
           data = result.data;
           error = result.error;
+          console.log({textSearch: query});
+          console.log({resultIns: result.data});
         } catch (error) {
           console.error('Error searching data:', error.message);
           return;
@@ -74,7 +76,7 @@ const HomeScreen = ({navigation}) => {
       console.error('Error searching data:', error);
       return;
     }
-
+    console.log({searcData: data});
     setSearchResults(data);
     // console.log({searchResults: searchResults});
   };
@@ -114,6 +116,8 @@ const HomeScreen = ({navigation}) => {
                 selected={selectedTab === tab}
                 onClick={() => {
                   setSelectedTab(tab);
+                  setSearchQuery('');
+                  setFilter(null);
                 }}
                 key={index}
                 text={tab}
@@ -146,7 +150,7 @@ const HomeScreen = ({navigation}) => {
       ) : selectedTab === LIST_TAB[1] ? (
         <ListClasses searchResults={searchResults} />
       ) : (
-        <ListInstructor listIns={listIns} />
+        <ListInstructor listIns={searchResults} />
       )}
     </View>
   );

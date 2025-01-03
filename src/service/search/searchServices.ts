@@ -44,9 +44,9 @@ async function searchSessionName(input: {
 }
 async function searchClassName(input: {filter?: Filter; textSearch?: string}) {
   try {
-    let query = supabase.from('classes').select('*');
+    let queryClass = supabase.from('classes').select('*');
     if (input.textSearch) {
-      query = query.textSearch('class_name', input.textSearch);
+      queryClass = queryClass.textSearch('class_name', input.textSearch);
     }
     if (input.filter) {
       console.log({input: input.filter.levels});
@@ -54,24 +54,24 @@ async function searchClassName(input: {filter?: Filter; textSearch?: string}) {
         const string = `level.in.(${input.filter.levels
           .map(value => `"${value}"`)
           .join(',')})`;
-        query = query.or(string);
+        queryClass = queryClass.or(string);
       }
       if (input.filter.listIns?.length > 0) {
         const string = `instructor_id.in.(${input.filter.listIns
           .map(value => `"${value.id}"`)
           .join(',')})`;
-        query = query.or(string);
+        queryClass = queryClass.or(string);
       }
       if (input.filter.genres?.length > 0) {
         const string = `genre.in.(${input.filter.genres
           .map(value => `"${value}"`)
           .join(',')})`;
         console.log({genre: string});
-        query = query.or(string);
+        queryClass = queryClass.or(string);
       }
     }
-    query = query.order('id', {ascending: true});
-    const response = await query;
+    queryClass = queryClass.order('id', {ascending: true});
+    const response = await queryClass;
     console.log({class: response.data});
     return {data: response.data, error: response.error};
   } catch (error) {
@@ -81,13 +81,16 @@ async function searchClassName(input: {filter?: Filter; textSearch?: string}) {
 }
 async function searchInstructorName(input: {textSearch?: string}) {
   try {
-    let query = supabase.from('users').select('*').eq('role', 'instructor');
+    let queryIns = supabase
+      .from('users')
+      .select('id, name, avatar_url')
+      .eq('role', 'instructor');
     if (input.textSearch) {
-      query = query.textSearch('name', input.textSearch);
+      queryIns = queryIns.textSearch('name', input.textSearch);
     }
 
     // query = query.order('id', {ascending: true});
-    const response = await query;
+    const response = await queryIns;
     console.log({instructor: response.data});
     return {data: response.data, error: response.error};
   } catch (error) {
