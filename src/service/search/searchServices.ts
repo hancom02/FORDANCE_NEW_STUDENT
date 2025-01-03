@@ -85,7 +85,7 @@ async function searchInstructorName(input: {textSearch?: string}) {
     if (input.textSearch) {
       query = query.textSearch('name', input.textSearch);
     }
-    console.log({query: query});
+
     // query = query.order('id', {ascending: true});
     const response = await query;
     console.log({instructor: response.data});

@@ -10,7 +10,7 @@ const ListClasses = ({searchResults}) => {
       keyExtractor={item => item.id.toString()}
       renderItem={({item}) => (
         <ClassCard
-          linkImg={{uri: item.thumbnail_url}}
+          linkImg={{uri: item.image_cover_url}}
           name={item.class_name}
           level={item.level}
           genre={item.genre}
