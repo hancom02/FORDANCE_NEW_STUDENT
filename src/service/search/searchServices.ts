@@ -79,6 +79,22 @@ async function searchClassName(input: {filter?: Filter; textSearch?: string}) {
     return {data: null, error: error.message};
   }
 }
+async function searchInstructorName(input: {textSearch?: string}) {
+  try {
+    let query = supabase.from('users').select('*').eq('role', 'instructor');
+    if (input.textSearch) {
+      query = query.textSearch('name', input.textSearch);
+    }
+    console.log({query: query});
+    // query = query.order('id', {ascending: true});
+    const response = await query;
+    console.log({instructor: response.data});
+    return {data: response.data, error: response.error};
+  } catch (error) {
+    Alert.alert('Error searching data:', error.message);
+    return {data: null, error: error.message};
+  }
+}
 
 // Calculate total pages based on the total number of items
 async function totalPages(query) {
@@ -108,4 +124,5 @@ export const searchServices = {
   searchClassName,
   totalPages,
   getListIns,
+  searchInstructorName,
 };
