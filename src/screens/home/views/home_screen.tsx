@@ -74,7 +74,7 @@ const HomeScreen = ({navigation}) => {
       console.error('Error searching data:', error);
       return;
     }
-
+    console.log({searcData: data});
     setSearchResults(data);
     // console.log({searchResults: searchResults});
   };
@@ -114,6 +114,8 @@ const HomeScreen = ({navigation}) => {
                 selected={selectedTab === tab}
                 onClick={() => {
                   setSelectedTab(tab);
+                  setSearchQuery('');
+                  setFilter(null);
                 }}
                 key={index}
                 text={tab}
@@ -129,6 +131,7 @@ const HomeScreen = ({navigation}) => {
         setSearchQuery={setSearchQuery}
         handleSearchSubmit={handleSearchSubmit}
         setShowFilter={setShowFilter}
+        hidden={!(selectedTab === 'INSTRUCTORS')}
         hidden={!(selectedTab === 'INSTRUCTORS')}
       />
       <FilterScreen
@@ -146,7 +149,7 @@ const HomeScreen = ({navigation}) => {
       ) : selectedTab === LIST_TAB[1] ? (
         <ListClasses searchResults={searchResults} />
       ) : (
-        <ListInstructor listIns={listIns} />
+        <ListInstructor listIns={searchResults} />
       )}
     </View>
   );

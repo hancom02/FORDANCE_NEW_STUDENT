@@ -14,6 +14,7 @@ const Search = ({
   setSearchQuery,
   handleSearchSubmit,
   setShowFilter,
+  hidden = false,
 }) => {
   return (
     <View style={styles.searchContainer}>
@@ -31,19 +32,19 @@ const Search = ({
           onSubmitEditing={handleSearchSubmit}
         />
       </View>
-
-      {/* icon button */}
-      <TouchableHighlight
-        onPress={() => {
-          setShowFilter(true);
-        }}>
-        <View>
-          <Image
-            source={require('../assests/img/Filter_alt.png')}
-            style={styles.btnIcon}
-          />
-        </View>
-      </TouchableHighlight>
+      {hidden && (
+        <TouchableHighlight
+          onPress={() => {
+            setShowFilter(true);
+          }}>
+          <View>
+            <Image
+              source={require('../assests/img/Filter_alt.png')}
+              style={styles.btnIcon}
+            />
+          </View>
+        </TouchableHighlight>
+      )}
     </View>
   );
 };
