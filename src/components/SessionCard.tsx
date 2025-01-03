@@ -1,37 +1,42 @@
 import React from 'react';
-import {Image, View, TouchableHighlight, Alert, Text} from 'react-native';
+import {Image, View, TouchableHighlight, Alert, Text, TouchableOpacity} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {iconSize} from '../constants/common';
 import Tag from '../screens/search/components/Tag';
 import MyColor from '../constants/color';
 
 const SessionCard = ({
+  session_id = '',
   linkImg = require('../assests/img/imgExample.png'),
   name = 'Name Dance',
   level = 'BEGINNER',
   genre = 'Dancer',
   nameIns = 'Name Instructor',
+  price = 0,
+  onPress = () => {},
 }) => {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       {/* img card */}
       <View style={styles.card}>
         <Image style={styles.img} source={linkImg} />
 
-        <TouchableHighlight
+        {/* <TouchableHighlight
           style={[styles.iconBtn, styles.rightIconBtn]}
           onPress={() => {
             Alert.alert('Hi right');
           }}>
           <Image source={require('../assests/img/calendar_icon.png')} />
-        </TouchableHighlight>
-        <TouchableHighlight
+        </TouchableHighlight> */}
+
+        
+        {price > 0 && <TouchableHighlight
           style={[styles.iconBtn, styles.leftIconBtn]}
           onPress={() => {
             Alert.alert('Hi left');
           }}>
           <Image source={require('../assests/img/lock_bgblack.png')} />
-        </TouchableHighlight>
+        </TouchableHighlight> }
         <Text style={styles.text}>{name}</Text>
         {/* <Tag text={name} textColor={'white'} bgColor={'black'} size={15} /> */}
       </View>
@@ -47,7 +52,7 @@ const SessionCard = ({
           size={11}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

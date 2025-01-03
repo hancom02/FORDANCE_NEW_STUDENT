@@ -7,7 +7,11 @@ async function searchSessionName(input: {
   textSearch?: string;
 }) {
   try {
-    let query = supabase.from('sessions').select('*');
+    let query = supabase.from('sessions')
+      .select('*')
+      .neq('status', 'rejected')
+      .neq('status', 'waiting')
+      .neq('status', 'deleted');
     if (input.textSearch) {
       query = query.textSearch('session_name', input.textSearch);
     }

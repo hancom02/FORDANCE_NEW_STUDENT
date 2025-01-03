@@ -56,8 +56,18 @@ const HomeScreen = ({navigation}) => {
           return;
         }
         break;
-      // default:
-      // statusMessage = 'User status is unknown';
+      case 'INSTRUCTORS':
+        try {
+          const result = await searchServices.searchInstructorName({
+            textSearch: query,
+          });
+          data = result.data;
+          error = result.error;
+        } catch (error) {
+          console.error('Error searching data:', error.message);
+          return;
+        }
+        break;
     }
 
     if (error) {
@@ -119,6 +129,7 @@ const HomeScreen = ({navigation}) => {
         setSearchQuery={setSearchQuery}
         handleSearchSubmit={handleSearchSubmit}
         setShowFilter={setShowFilter}
+        hidden={!(selectedTab === 'INSTRUCTORS')}
       />
       <FilterScreen
         show={showFilter}
