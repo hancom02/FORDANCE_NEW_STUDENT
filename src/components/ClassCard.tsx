@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image, View, TouchableHighlight, Alert, Text} from 'react-native';
+import {Image, View, TouchableHighlight, Alert, Text, TouchableOpacity} from 'react-native';
 import {StyleSheet} from 'react-native';
 import {iconSize} from '../constants/common';
 import Tag from '../screens/search/components/Tag';
@@ -11,39 +11,40 @@ const ClassCard = ({
   genre = 'Dancer',
   nameIns = 'Name Instructor',
   count = 7,
+  handlePress = () => {}
 }) => {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={handlePress}>
       {/* img */}
       <Image style={styles.img} source={linkImg} />
       {/* right icon btn */}
-      <TouchableHighlight
+      {/* <TouchableHighlight
         style={[styles.iconBtn, styles.rightIconBtn]}
         onPress={() => {
           Alert.alert('Hi right');
         }}>
         <Image source={require('../assests/img/calendar_icon.png')} />
-      </TouchableHighlight>
+      </TouchableHighlight> */}
       {/* left icon btn */}
-      <TouchableHighlight
+      {/* <TouchableHighlight
         style={[styles.iconBtn, styles.leftIconBtn]}
         onPress={() => {
           Alert.alert('Hi left');
         }}>
         <Image source={require('../assests/img/lock_bgblack.png')} />
-      </TouchableHighlight>
+      </TouchableHighlight> */}
       {/* tags */}
       <View style={styles.infoCard}>
         <View style={styles.flexRow}>
           <Tag text={level} textColor={'white'} bgColor={'pink'} size={11} />
-          <Tag
+          {/* <Tag
             text={count + ' videos'}
             textColor={'white'}
             bgColor={'#B0B0B0'}
             size={11}
             style={styles.flexRow}>
             <Image source={require('../assests/img/Video_light.png')} />
-          </Tag>
+          </Tag> */}
         </View>
         <Text style={styles.text}>{name}</Text>
         <View style={styles.flexRow}>
@@ -57,7 +58,7 @@ const ClassCard = ({
           />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
