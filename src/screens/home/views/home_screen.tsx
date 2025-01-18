@@ -132,7 +132,6 @@ const HomeScreen = ({navigation}) => {
         handleSearchSubmit={handleSearchSubmit}
         setShowFilter={setShowFilter}
         hidden={!(selectedTab === 'INSTRUCTORS')}
-        hidden={!(selectedTab === 'INSTRUCTORS')}
       />
       <FilterScreen
         show={showFilter}
@@ -160,6 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flexDirection: 'column',
     gap: 24,
+    marginBottom: 100
   },
   scrollView: {height: '10%'},
   tabs: {
