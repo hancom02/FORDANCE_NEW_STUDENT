@@ -1,17 +1,22 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import {FlatList, Image, StyleSheet, View, Text} from 'react-native';
+import {FlatList, Image, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 
 const ListInstructor = ({listIns}) => {
+  const navigation = useNavigation();
+  const handlePress = (instructor_id : string) => {
+    navigation.navigate('InstructorProfileScreen', {instructor_id});
+  };
   return (
     <FlatList
       style={styles.flatList}
       data={listIns}
       keyExtractor={item => item.id.toString()}
       renderItem={({item}) => (
-        <View key={item.id} style={styles.card}>
+        <TouchableOpacity key={item.id} style={styles.card} onPress={() => handlePress(item.id)}>
           <Image style={styles.img} source={{uri: item.avatar_url}} />
           <Text style={styles.text}>{item.name}</Text>
-        </View>
+        </TouchableOpacity>
       )}
       // onEndReached={handleLoadMore}
       onEndReachedThreshold={0.1}
