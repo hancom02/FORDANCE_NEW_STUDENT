@@ -34,7 +34,7 @@ const VideoPlayer = ({ uri, visible, setVisible }) => {
                 />
                 <View style={styles.closeButton}>
                     <TouchableOpacity onPress={handleClose}>
-                        <Icon name="close-outline" size={30} color="white" />
+                        <Icon name="close" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>
