@@ -88,6 +88,7 @@ async function searchInstructorName(input: {textSearch?: string}) {
     let queryIns = supabase
       .from('users')
       .select('id, name, avatar_url')
+      .neq('active', false)
       .eq('role', 'instructor');
     if (input.textSearch) {
       queryIns = queryIns.textSearch('name', input.textSearch);
