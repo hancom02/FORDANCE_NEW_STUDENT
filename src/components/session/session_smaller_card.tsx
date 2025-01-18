@@ -7,19 +7,23 @@ import {
     Dimensions,
   } from 'react-native';
   import Icon from 'react-native-vector-icons/FontAwesome';
+import { EStatus } from '../../types/status_enum';
+import MyColor from '../../constants/color';
 import React from 'react';
-import { EStatus } from '../types/status_enum';
-import MyColor from '../constants/color';
 
   interface LessonCardProps {
     session: ISession;
     handleNav: () => void;
+    onPressOpenMoreAction: () => void;
+    onPressCloseMoreAction?: () => void;
   }
  
-  const LessonCard: React.FC<LessonCardProps> = (props) => {
+  const SessionSmallerCard: React.FC<LessonCardProps> = (props) => {
     const {
       session,
       handleNav,
+      onPressOpenMoreAction,
+      onPressCloseMoreAction,
     } = props;
   
     return (
@@ -27,11 +31,14 @@ import MyColor from '../constants/color';
         <View style={styles.firstContainer}>
           <Image style={styles.image} source={{uri: session.thumbnail_url}} />
           <View style={{flexDirection: 'column', height: '100%', width: '45%', justifyContent: 'center'}}>
+            
             {session.status === EStatus.Waiting &&
               <View style={styles.textStatusContainer}> 
                 <Text style={styles.textStatus}>{session.status}</Text>
               </View>
             }
+
+
             <View style={styles.textContentContainer}>
               {/* <View style={styles.}> */}
                 <Text
@@ -46,10 +53,15 @@ import MyColor from '../constants/color';
 
           </View>
         </View>
+        <TouchableOpacity
+          style={styles.secondContainer}
+          onPress={onPressOpenMoreAction}>
+          <Icon name='ellipsis-v' size={24} color="black"/>
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
-  export default LessonCard;
+  export default SessionSmallerCard;
   
   const styles = StyleSheet.create({
     container: {
@@ -89,7 +101,7 @@ import MyColor from '../constants/color';
     textStatus: {
       fontSize: 13,
       fontWeight: '500',
-      color: 'orange',
+      color: MyColor.primary,
     },
     textLessonName: {
       fontSize: 19,
