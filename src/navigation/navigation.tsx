@@ -87,9 +87,6 @@ export default function Navigation() {
         <Stack.Screen name="InstructorProfileScreen" component={InstructorProfileScreen} />
         <Stack.Screen name="ListFavSessionScreen" component={ListFavSessionScreen} />
         <Stack.Screen name="ListJoinSessionScreen" component={ListJoinSessionScreen} />
-
-
-
       </Stack.Navigator>
     </NavigationContainer>
   );
