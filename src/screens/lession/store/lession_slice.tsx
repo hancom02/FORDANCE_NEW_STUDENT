@@ -33,12 +33,162 @@ export const useSession = create(
           throw new Error(err.message);
         }
       },
+      checkIfRowFavExists: async (session_id: string, user_id: string): Promise<{ exists: boolean; is_favourite?: boolean }> => {
+        try {
+          const { data, error }: { data: { result_video_url: string }[]; error: any } = await supabase
+            .from('users_sessions_favourite')
+            .select('is_favourite')
+            .eq('user_id', user_id)
+            .eq('session_id', session_id)
+            .single();
+      
+          if (error && error.code === 'PGRST116') {
+            // Nếu không tìm thấy row
+            return { exists: false };
+          } else if (error) {
+            throw new Error(error.message);
+          }
+      
+          // Nếu row tồn tại, trả về trạng thái is_favourite
+          return { exists: true, is_favourite: data?.is_favourite };
+        } catch (err) {
+          console.error('Error in checkIfRowExists:', err.message);
+          throw new Error('Failed to check row existence');
+        }
+      },      
+      getIsFavSession: async (session_id: string, user_id: string): Promise<boolean> => {
+        try {
+          const { data, error } = await supabase
+            .from('users_sessions_favourite')
+            .select('is_favourite')
+            .eq('user_id', user_id)
+            .eq('session_id', session_id)
+            .single();
+      
+          if (error) {
+            if (error.code === 'PGRST116') {
+              // Không có row tương ứng
+              return false;
+            }
+            throw new Error(error.message);
+          }
+      
+          return data?.is_favourite || false;
+        } catch (err) {
+          console.error('Error in getIsFavSession:', err.message);
+          throw new Error('Failed to get favourite status');
+        }
+      },
+      insertFavourite: async (session_id: string, user_id: string): Promise<void> => {
+        try {
+          const {data, error } = await supabase
+            .from('users_sessions_favourite')
+            .insert([
+              {
+                user_id: user_id,
+                session_id: session_id,
+                is_favourite: true,
+              },
+            ]);
+      
+          if (error) {
+            throw new Error(error.message);
+          }
+      
+          console.log('Favourite added successfully');
+        } catch (err) {
+          console.error('Error in insertFavourite:', err.message);
+          throw new Error('Failed to insert favourite');
+        }
+      },
+      updateFavourite: async (session_id: string, user_id: string, is_favourite: boolean): Promise<void> => {
+        try {
+          const {data, error } = await supabase
+            .from('users_sessions_favourite')
+            .update({ is_favourite: is_favourite })
+            .eq('user_id', user_id)
+            .eq('session_id', session_id);
+      
+          if (error) {
+            throw new Error(error.message);
+          }
+      
+          console.log('Favourite updated successfully');
+        } catch (err) {
+          console.error('Error in updateFavourite:', err.message);
+          throw new Error('Failed to update favourite');
+        }
+      },      
+      getRatingSession: async (session_id: string): Promise<number> => {
+        try {
+          const { data, error } = await supabase
+            .from('users_sessions_joined')
+            .select('rating')
+            .eq('session_id', session_id);
+      
+          if (error) {
+            console.error('Error fetching ratings:', error.message);
+            throw new Error(error.message);
+          }
+      
+          if (!data || data.length === 0) {
+            return 0; // Trả về 0 nếu không có dữ liệu
+          }
+      
+          // Lọc ra những rating khác 0
+          const validRatings = data.filter(row => row.rating > 0);
+          
+          if (validRatings.length === 0) {
+            return 0; // Nếu không còn rating hợp lệ thì trả về 0
+          }
+      
+          const totalRating = validRatings.reduce((sum, row) => sum + (row.rating || 0), 0);
+          const averageRating = totalRating / validRatings.length;
+      
+          return parseFloat(averageRating.toFixed(1)); // Làm tròn về 1 chữ số thập phân
+        } catch (err) {
+          console.error('Catch Error:', err.message);
+          throw new Error('Failed to calculate rating');
+        }
+      },
+      insertVideoResult: async (
+        user_id: string,
+        result_video_url: string,
+        session_id: string
+      ): Promise<string> => {
+        try {
+          const { data, error } = await supabase
+            .from('users_sessions_joined')
+            .update({ result_video_url })
+            .match({ user_id, session_id })
+            .select(); // Thêm select() để chắc chắn lấy dữ liệu hàng cập nhật
+      
+          if (error) {
+            console.error('Error inserting video result:', error.message);
+            throw new Error(`Error inserting video result: ${error.message}`);
+          }
+      
+          if (!data || data.length === 0) {
+            throw new Error('No matching row found to update');
+          }
+      
+          console.log('Video result inserted successfully:', data);
+      
+          return data[0]?.result_video_url || ''; // Trả về video URL nếu có
+        } catch (err) {
+          console.error('Catch Error:', err.message || err);
+          throw new Error(err.message || 'Failed to insert video result');
+        }
+      },         
       getInstructor: async (instructorId: string): Promise<IInstructor | null> => {
         try {
             const { data: instructorData, error: classError } = await supabase
             .from('users')
             .select('id, username, avatar_url')
-            .match({ instructor_id: instructorId }); 
+            .eq('id', instructorId)
+            .single(); 
+
+            console.log('getInstructor, instructorId: ', instructorId);
 
             if (classError) {
               console.error('Error:', classError.message);
@@ -47,7 +197,7 @@ export const useSession = create(
               });
               throw new Error(classError.message);
             }
-            return instructorData as unknown as IInstructor;
+            return instructorData as IInstructor;
         }catch(err) {
           throw new Error(err.message);
         };
@@ -74,59 +224,49 @@ export const useSession = create(
           throw new Error(err.message);
         }
       },
-      getEnumLevelValues: async (): Promise<string[] | null> => {
-        const { data, error } = await supabase.rpc('get_enum_level_values');
-          
-          if (error) {
-            console.error(error);
-          } else {
-            console.log('getEnumLevelValues: ', data);
-          }
-        return data;
-      },
-      getEnumGenreValues: async (enum_name: string): Promise<string[] | null> => {
-        const { data, error } = await supabase.rpc('get_enum_genre_values');
-          
-          if (error) {
-            console.error(error);
-          } else {
-            console.log('getEnumGenreValues: ', data); 
-          }
-          return data;
-      },
-      fetchClass: async (class_id: string): Promise<IClass | null> => {
+      getJoinedData: async (session_id: string, student_id: string): Promise<IJoin | false> => {
         try {
-            const {data, error} = await supabase
-            .from('classes')
-            .select('id, class_name, level, genre')
-            .eq('id', class_id)
-            .single()
-
-            if (error) {
-                throw new Error(error.message);
-            }
-            console.log('data class: ', data);
-            return data as IClass;
-        } catch (err) {
-            throw new Error(err.message);
-        }        
-      },
-      fetchJoinedData: async (session_id: string): Promise<IJoin[] | null> => {
-        try {
-          const {data, error} = await supabase
-          .from('users_sessions_joined')
-          .select('*')
-          .eq('session_id', session_id)
-
-          if (error) {
-              throw new Error(error.message);
+          const { data, error } = await supabase
+            .from('users_sessions_joined')
+            .select('*')
+            .eq('session_id', session_id)
+            .eq('user_id', student_id)
+            .single();
+      
+          if (error && error.code === 'PGRST116') {
+            // Lỗi không tìm thấy row, trả về false
+            return false;
+          } else if (error) {
+            // Xử lý các lỗi khác
+            throw new Error(error.message);
           }
-          console.log('student joined: ', data);
-          return data as IJoin[];
+      
+          console.log('Student joined: ', data);
+          return data as IJoin; // Trả về dữ liệu nếu tìm thấy
         } catch (err) {
-            throw new Error(err.message);
-        }   
-      },
+          console.error('Error in fetchJoinedData:', err.message);
+          throw new Error('Failed to fetch joined data');
+        }
+      },  
+      insertJoinSession: async (joinedData: IJoin): Promise<IJoin | false> => {
+        try {
+          const { data, error } = await supabase
+            .from('users_sessions_joined')
+            .insert(joinedData)
+            .single(); 
+      
+          if (error) {
+            console.error('Error inserting joined session:', error.message);
+            return false; // Trả về false nếu có lỗi
+          }
+      
+          console.log('Successfully inserted joined session:', data);
+          return data as IJoin;
+        } catch (err) {
+          console.error('Error in insertJoinSession:', err.message);
+          throw new Error('Failed to insert joined session');
+        }
+      },         
       fetchComments: async (session_id: string): Promise<IComment[] | null> => {
         try {
           const {data: cmtDta, error: cmtError} = await supabase
@@ -164,24 +304,6 @@ export const useSession = create(
             throw new Error(err.message);
         }   
       },
-      updateSession: async (session_id: string, session_name: string, level: string, genre: string): Promise<ISession | null> => {
-        const { data, error } = await supabase
-            .from('sessions')
-            .update({
-              session_name: session_name,
-              level: level,
-              genre: genre
-            })  
-            .eq('id', session_id)
-            .single(); 
-            
-        if (error) {
-            console.error("Error adding session:", error);
-            Alert.alert('Error adding session: ', error);
-            return null;  
-        }    
-        return data;  
-      },    
     })),
     {
       name: 'session',
