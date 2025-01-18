@@ -1,8 +1,10 @@
 import React from 'react';
 import ClassCard from './ClassCard';
 import {FlatList, StyleSheet} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const ListClasses = ({searchResults}) => {
+  const navigation =useNavigation();
   return (
     <FlatList
       style={styles.flatList}
@@ -16,6 +18,9 @@ const ListClasses = ({searchResults}) => {
           genre={item.genre}
           nameIns={item.instructor_username}
           count={item.session_count}
+          handlePress={() => {
+            navigation.navigate('ClassNewScreen', {class_id: item.id});
+          }}
         />
       )}
       // onEndReached={handleLoadMore}
