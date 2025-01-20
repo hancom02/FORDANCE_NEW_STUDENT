@@ -51,11 +51,16 @@ export const useDiscover = create(
           }
       },  
       getFavSession: async (uuid: string): Promise<ISession[] | null> => {
+        console.log('discover slice - getFavSession');
         try {  
           const { data: favData, error: favError } = await supabase
             .from('users_sessions_favourite')
             .select('*')
             .eq('user_id', uuid)
+            .eq('is_favourite', true)
+
+            console.log('discover slice - favData: ', favData);
+
 
           if (favError) {
             console.error('Error:', favError.message);
@@ -70,11 +75,15 @@ export const useDiscover = create(
           }
 
           const sessionIds = favData.map((session) => session.session_id);
+          console.log('discover slice - fav session id list: ', sessionIds);
 
           const { data: sessions, error: sessionsError } = await supabase
             .from('sessions')
             .select('*')
             .in('id', sessionIds);
+
+          console.log('discover slice - getFavSession data: ', sessions);
+
       
           if (sessionsError) {
             console.error('Error:', sessionsError.message);
