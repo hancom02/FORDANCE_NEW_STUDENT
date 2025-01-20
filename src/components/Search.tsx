@@ -56,12 +56,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 7,
+    gap: 12,
     paddingHorizontal: myPadding.horizontal,
-    paddingVertical: myPadding.vertical,
+    // paddingVertical: myPadding.vertical,
+    paddingBottom: 16,
     borderBottomColor: MyColor.stroke,
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 0.8,
     borderStyle: 'solid',
+    // marginHorizontal: 16
   },
   inputWrapper: {
     flex: 1,

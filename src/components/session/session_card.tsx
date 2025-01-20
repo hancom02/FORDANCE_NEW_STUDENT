@@ -57,6 +57,8 @@ interface SessionCardProps {
                 {session.instructor_id}
               </Text> */}
             </View>
+
+            
           </View>
         </ImageBackground>
       </TouchableOpacity>
