@@ -5,7 +5,6 @@ import MyHeader from "../../../components/header";
 import MyColor from "../../../constants/color";
 import SessionCard from "../../../components/session/session_card";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { color } from "@rneui/themed/dist/config";
 import Session2Card from "../../../components/session/session2_card";
 import ClassWiderCard from "../../../components/session/class/class_wider_card";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -47,6 +46,7 @@ const DiscoverScreen = () => {
       });
     }
     const fetchFavSessions = async () => {
+      console.log('call fetchFavSessions');
       await getFavSession(uuid).then((data) => {
         setFavSessions(data);
       }).catch((err) => {
@@ -83,7 +83,7 @@ const DiscoverScreen = () => {
 
     };
     const handleNavDetailLesson = (lesionId : string) => {
-      navigation.navigate('LessionScreen', {session_id:lesionId});
+      navigation.navigate('LessionScreen', {session_id: lesionId});
     }
     const handleNavDetailProgram = (classId : string) => {
       navigation.navigate('ClassNewScreen', {class_id: classId});
@@ -91,159 +91,159 @@ const DiscoverScreen = () => {
 
     console.log('uuid: ', uuid);
     console.log('displaySessions', displaySessions);
+    console.log('favSessions:', favSessions);
 
 
     return (
-        <SafeAreaView>
-            <MyHeader />
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.searchContainer}>
-          <TouchableOpacity onPress={handleOpenSearch}>
-            <Icon name="search" size={25} color={MyColor.black}/>
-          </TouchableOpacity>
-        </View>
+      <SafeAreaView>
+          <MyHeader />
+          <View style={styles.separator}></View>
+          <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.searchContainer}>
+            </View>
 
-        {/* LESSON CỤM ĐẦU */}
-        <View style={styles.contentContainer}>
-          <View style={styles.lessons1Container}>
-            <FlatList
-              data={displaySessions}
-              renderItem={({item, index}) => (
-                <SessionCard
-                  session={item}
-                  handleNav={() => handleNavDetailLesson(item.id)}
+            {/* LESSON CỤM ĐẦU */}
+            <View style={styles.contentContainer}>
+              <View style={styles.lessons1Container}>
+                <FlatList
+                  data={displaySessions}
+                  renderItem={({item, index}) => (
+                    <SessionCard
+                      session={item}
+                      handleNav={() => handleNavDetailLesson(item.id)} 
+                    />
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
                 />
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
-        </View>
+              </View>
+            </View>
 
-        {/* LESSON CỤM 2 */}
-        {/* <View style={styles.todayLessonsContainer}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingBottom: 16, paddingRight: 16 }}>
-                        <Text style={styles.textTitle}>{todayLesson}</Text>
-                        <TouchableOpacity>
-                            <Text style={styles.textSeeAll}>{seeAll}</Text>
-                        </TouchableOpacity>
+            {/* LESSON CỤM 2 */}
+            {/* <View style={styles.todayLessonsContainer}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingBottom: 16, paddingRight: 16 }}>
+                            <Text style={styles.textTitle}>{todayLesson}</Text>
+                            <TouchableOpacity>
+                                <Text style={styles.textSeeAll}>{seeAll}</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View>
+                            <FlatList
+                                data={todayLessons}
+                                renderItem={({ item, index }) =>
+                                    <View style={{ width: imgWidth, marginRight: 8 }}>
+                                        <Lesson2Component
+                                            lessons={item}
+                                            handleNav={() => handleNavDetailLesson(item)}
+                                        />
+                                    </View>}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                            />
+                        </View>
+                    </View> */}
+
+            {/* LESSON CỤM 3 */}
+            {joinedSessions != null && <View style={styles.todayLessonsContainer}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  paddingBottom: 16,
+                  paddingRight: 16,
+                }}>
+                <Text style={styles.textTitle}>{joinedSession}</Text>
+                <TouchableOpacity>
+                  <Text style={styles.textSeeAll}>{seeAll}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View>
+                <FlatList
+                  data={joinedSessions}
+                  renderItem={({item, index}) => (
+                    <View style={{width: imgWidth, marginRight: 8}}>
+                      <Session2Card
+                        lessons={item}
+                        handleNav={() => handleNavDetailLesson(item.id)} 
+                      />
                     </View>
-
-                    <View>
-                        <FlatList
-                            data={todayLessons}
-                            renderItem={({ item, index }) =>
-                                <View style={{ width: imgWidth, marginRight: 8 }}>
-                                    <Lesson2Component
-                                        lessons={item}
-                                        handleNav={() => handleNavDetailLesson(item)}
-                                    />
-                                </View>}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                        />
-                    </View>
-                </View> */}
-
-        {/* LESSON CỤM 3 */}
-        <View style={styles.todayLessonsContainer}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              paddingBottom: 16,
-              paddingRight: 16,
-            }}>
-            <Text style={styles.textTitle}>{joinedSession}</Text>
-            <TouchableOpacity>
-              <Text style={styles.textSeeAll}>{seeAll}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View>
-            <FlatList
-              data={joinedSessions}
-              renderItem={({item, index}) => (
-                <View style={{width: imgWidth, marginRight: 8}}>
-                  <Session2Card
-                    lessons={item}
-                    handleNav={() => handleNavDetailLesson(item.id)}
-                  />
-                </View>
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
-        </View>
-
-        {/* PROGRAM LIST */}
-        <View style={styles.todayLessonsContainer}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              paddingBottom: 16,
-              paddingRight: 16,
-            }}>
-            <Text style={styles.textTitle}>{danceprogram}</Text>
-            <TouchableOpacity>
-              <Text style={styles.textSeeAll}>{seeAll}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View>
-            <FlatList
-              data={displayClasses}
-              renderItem={({item, index}) => (
-                <ClassWiderCard
-                    classData={item}
-                    handleNav={() => handleNavDetailProgram(item.id)}
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
                 />
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
-        </View>
+              </View>
+            </View>}
 
-        {/* FAV LESSONS */}
-        <View style={styles.todayLessonsContainer}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              paddingBottom: 16,
-              paddingRight: 16,
-            }}>
-            <Text style={styles.textTitle}>{saveLesson}</Text>
-            <TouchableOpacity>
-              <Text style={styles.textSeeAll}>{seeAll}</Text>
-            </TouchableOpacity>
-          </View>
+            {/* PROGRAM LIST */}
+            <View style={styles.todayLessonsContainer}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  paddingBottom: 16,
+                  paddingRight: 16,
+                }}>
+                <Text style={styles.textTitle}>{danceprogram}</Text>
+                <TouchableOpacity>
+                  <Text style={styles.textSeeAll}>{seeAll}</Text>
+                </TouchableOpacity>
+              </View>
 
-          <View>
-            <FlatList
-              data={favSessions}
-              renderItem={({item, index}) => (
-                <View
-                  style={{width: imgWidth, marginRight: 8, marginBottom: 24}}>
-                  <Session2Card
-                    lessons={item}
-                    handleNav={() => handleNavDetailLesson(item.id)}
-                  />
-                </View>
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
-        </View>
-      </ScrollView>
-        </SafeAreaView>
+              <View>
+                <FlatList
+                  data={displayClasses}
+                  renderItem={({item, index}) => (
+                    <ClassWiderCard
+                        classData={item}
+                        handleNav={() => handleNavDetailProgram(item.id)}
+                    />
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            </View>
+
+            {/* FAV LESSONS */}
+            {favSessions != null && <View style={styles.todayLessonsContainer}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  paddingBottom: 16,
+                  paddingRight: 16,
+                }}>
+                <Text style={styles.textTitle}>{saveLesson}</Text>
+                <TouchableOpacity>
+                  <Text style={styles.textSeeAll}>{seeAll}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View>
+                <FlatList
+                  data={favSessions}
+                  renderItem={({item, index}) => (
+                    <View
+                      style={{width: imgWidth, marginRight: 8, marginBottom: 24}}>
+                      <Session2Card
+                        lessons={item}
+                        handleNav={() => handleNavDetailLesson(item.id)}
+                      />
+                    </View>
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            </View>}
+
+          </ScrollView>
+      </SafeAreaView>
     )
 }
 
@@ -259,8 +259,14 @@ const styles = StyleSheet.create({
     scrollContainer: {
         paddingBottom: 60,
         paddingLeft: 16,
-        // backgroundColor: MyColor.stroke
+        backgroundColor: MyColor.white
       },
+      separator: {
+        height: 2,
+        backgroundColor: 'lightgray',
+        marginBottom: 0,
+        elevation: 3,
+    },
       searchContainer: {
         width: '100%',
         paddingVertical: 16,
