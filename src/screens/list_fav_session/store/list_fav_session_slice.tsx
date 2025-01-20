@@ -17,6 +17,8 @@ export const useFavListSession = create(
             .from('users_sessions_favourite')
             .select('*')
             .eq('user_id', uuid)
+            .eq('is_favourite', true)
+
 
           if (favError) {
             console.error('Error:', favError.message);
