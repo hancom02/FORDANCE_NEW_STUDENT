@@ -50,7 +50,7 @@ const ProfileScreen = () => {
         const profileData = await getProfile(uuid);
         setProfile(profileData);
 
-        setName(profileData.name );
+        setName(profileData.username );
         setEmail(profileData.email);
         setPhoneNumber(profileData.phone);
         setPrizes(profileData.prize);
