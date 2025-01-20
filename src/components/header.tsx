@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         height: 70,
-        backgroundColor: 'white',
+        backgroundColor: MyColor.white,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         shadowRadius: 5,
         elevation: 10,
+
     },
     text: {
         fontSize: 20,
