@@ -1,9 +1,9 @@
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import { View, Text, TouchableOpacity, SafeAreaView, Modal, StyleSheet, Image, ScrollView, Alert, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, SafeAreaView, Modal, StyleSheet, Image, ScrollView, Alert, Button, } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSession } from "../store/lession_slice";
 import { useAuth } from "../../../store/auth_slice";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import MyColor from "../../../constants/color";
 import CommentCard from "../component/comment_card";
 import VideoPlayer from "./video_player";
@@ -11,12 +11,14 @@ import StarRating from "./star_rating";
 import { pickVideoWithPermission } from "../../../utils/pick_video_util";
 import UploadVideoToSupabase from "../../../utils/upload_video_util";
 import Video from "react-native-video";
+import SizedBox from "../../../components/size_box";
+import throttle from 'lodash.throttle';
 
 const SessionScreen = () => {
     const route = useRoute<RouteProp<{ params: { session_id: string } }, 'params'>>();
     const { session_id } = route.params;
     const navigation = useNavigation();
-
+    const ref = useRef();
     console.log('session_id: ', session_id);
 
     const {uuid, username} = useAuth();
@@ -24,6 +26,7 @@ const SessionScreen = () => {
       getSession, 
       checkIfRowFavExists,
       getIsFavSession,
+      getFavSessionQuantity,
       insertFavourite,
       updateFavourite,
       getRatingSession,
@@ -32,6 +35,7 @@ const SessionScreen = () => {
       getJoinedData,
       insertJoinSession,
       insertVideoResult,
+      updateProgressSession,
     } = useSession();
 
     const [lesson, setLesson] = useState<ISession | null>(null);
@@ -47,11 +51,15 @@ const SessionScreen = () => {
     const [isModalOfflineStudentVisible, setModalOfflineStudentVisible] = useState(false);
     const [isModalScheduleVisible, setIsModalScheduleVisible] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const [favQuantity, setFavQuantity] = useState(0);
     const [isJoined, setIsJoined] = useState(false);
     const [joinedData, setJoinedData] = useState<IJoin>();
 
+    const [currentTime, setCurrentTime] = useState<number>(0); 
+    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
     const fetchLesson = async () => { 
-        // console.log('fetch session:', session_id);
         await getSession(session_id).then((res) => {
             setLesson(res);
         }).catch((err) => {
@@ -62,6 +70,14 @@ const SessionScreen = () => {
       await getIsFavSession(session_id, uuid).then((res) => {
         console.log('fetchfavLesson: ', res);
           setIsSaved(res);
+      }).catch((err) => {
+          console.error('Error:', err);
+      });
+    };  
+    const fetchFavQuantittyLesson = async () => { 
+      await getFavSessionQuantity(session_id).then((res) => {
+        console.log('fetchfavLesson: ', res);
+          setFavQuantity(res);
       }).catch((err) => {
           console.error('Error:', err);
       });
@@ -86,17 +102,14 @@ const SessionScreen = () => {
         const res = await getJoinedData(session_id, uuid);
     
         if (res === false) {
-          // Nếu không có dữ liệu (student chưa tham gia session)
           setIsJoined(false);
-          setJoinedData(null); // Đảm bảo xóa dữ liệu cũ (nếu có)
+          setJoinedData(null); 
         } else {
-          // Nếu có dữ liệu (student đã tham gia session)
           setIsJoined(true);
-          setJoinedData(res); // Lưu dữ liệu của session
+          setJoinedData(res); 
         }
       } catch (err) {
         console.error('Error in fetchIsJoinSession:', err.message);
-        // Optional: xử lý lỗi bằng cách hiển thị thông báo hoặc hành động phù hợp
       }
     };
         
@@ -104,6 +117,7 @@ const SessionScreen = () => {
       React.useCallback(() => {
         fetchLesson();
         fetchfavLesson();
+        fetchFavQuantittyLesson();
         fetchRatingLesson();
         fetchInstructor();
         fetchCommentsData();    
@@ -125,45 +139,107 @@ const SessionScreen = () => {
         fetchAllData();
       }, [lesson]) 
     );
-    
 
+    useEffect(() => {
+      fetchFavQuantittyLesson();
+    }, [isSaved]);
+
+    useEffect(() => {
+      // if (isShowVideo) {
+          fetchIsJoinSession();
+      // }
+  }, [isShowVideo]);
+
+    // console.log('joinedData.last_watch_time: ', joinedData?.last_watch_time);
+    
     const handleSave = async () => {
       try {
+        setIsSaved(!isSaved);
+
         const { exists, is_favourite } = await checkIfRowFavExists(session_id, uuid);
     
         if (exists) {
           if (is_favourite) {
             await updateFavourite(session_id, uuid, false);
+            setFavQuantity(favQuantity - 1);
           } else {
             await updateFavourite(session_id, uuid, true);
+            setFavQuantity(favQuantity + 1);
+
           }
         } else {
           await insertFavourite(session_id, uuid);
         }
     
-        setIsSaved(!isSaved);
       } catch (err) {
         console.error('Error in handleSave:', err.message);
       }
+    };    
+    const handleUpdateProgress = async (
+      // newProgress: number, 
+      lastWatchTime: number, 
+      longestWatchTime: number
+    ) => {
+      if (!joinedData) return;  
+
+      await updateProgressSession(session_id, uuid, lastWatchTime, longestWatchTime).then((res) => {
+        console.log('Progress updated successfully!');
+      }).catch((err) => {
+          console.error('Error updateProgressSession: ', err);
+      });
     };
+
+    // const onVideoProgress = (currentTime: number) => {
+    //   // const newProgress = (currentTime / lesson.duration) * 100;
+    //   const lastWatchTime = currentTime;
+    //   const longestWatchTime = Math.max(currentTime, joinedData?.longest_watch_time || 0);
+  
+    //   handleUpdateProgress(lastWatchTime, longestWatchTime);
+    // };    
+
+    const handleVideoProgress = throttle((e: any) => {
+      // console.log('LESSON SCREEN - call handleVideoProgress');
+
+      if (!isPlaying) return;
+
+      const currentTime = e.currentTime;
+      setCurrentTime(currentTime);
+
+      console.log('Current Time:', currentTime);
     
-    
+      const longestWatchTime = Math.max(currentTime, joinedData?.longest_watch_time || 0);
+      handleUpdateProgress(currentTime, longestWatchTime);
+    }, 500);
+  
+    const handleVideoEnd = () => {
+      setIsPaused(true);
+      console.log('Video ended');
+    };
+  
+    const handleVideoPause = () => {
+      setIsPaused(true);
+      console.log('Video paused');
+    };
+  
+    const handleVideoResume = () => {
+      setIsPaused(false);
+      console.log('Video resumed');
+      // Cập nhật khi video tiếp tục phát
+    };
+
+
     const handleNavVideoPlayer = () => {
       setIsShowVideo(true);
     };
     const handleNavigateCommunityDetail = () => {
       navigation.navigate('CommunityScreen', {session_id: session_id})
-      // navigation.navigate('Community', {
-      //   comments: lesson?.comments || [],
-      //   lesson,
-      // });
     };
     const handleJoin = async () => {
       try {
         setIsJoined(!isJoined);
     
         const joinedData: IJoin = {
-          session_id: session_id, 
+          session_id: session_id,
           user_id: uuid,
           created_at: new Date().toISOString(),
           progress: 0,
@@ -171,7 +247,9 @@ const SessionScreen = () => {
           review: "",
           rating: 0,
           username: username,
-          teacher_feedback: ""
+          teacher_feedback: "",
+          last_watch_time: 0,
+          longest_watch_time: 0
         };
     
         // Nếu chưa tham gia (isJoined là false), gọi insertJoinSession để thêm vào bảng
@@ -243,56 +321,36 @@ const SessionScreen = () => {
                 uri={lesson?.video_url}
                 visible={isShowVideo}
                 setVisible={setIsShowVideo}
+                timeStart={joinedData?.last_watch_time || 0}
+                onProgress={handleVideoProgress} 
+                onPlaying={() => setIsPlaying(true)}
+                onEnd={handleVideoEnd} 
               />
+              {/* {isShowVideo && <Button title="Play" onPress={() => setIsPlaying(true)} />} */}
+
             </TouchableOpacity>
           </View>
     
             <View style={styles.iconContainer}>
-              <TouchableOpacity
-                style={[styles.icon]}
-                onPress={handleSave}>
-                <Icon
-                  name={isSaved ? 'heart' : 'heart-o'}
-                  size={24}
-                  color={MyColor.primary}
-                />
-              </TouchableOpacity>
+              <View style={{flexDirection: 'row'}}>
+                <TouchableOpacity
+                  style={[styles.icon]}
+                  onPress={handleSave}>
+                  <Icon
+                    name={isSaved ? 'heart' : 'heart-o'}
+                    size={24}
+                    color={MyColor.primary}
+                  />
+                </TouchableOpacity>
+                {favQuantity !== 0 && 
+                  <Text style={{color: MyColor.primary, fontWeight: '600', fontSize: 16}}>{favQuantity}</Text>
+                }
+              </View>
 
               <StarRating 
               rating={rating} 
               handlePress={isJoined ? handleRating : () => Alert.alert("You must join the session first!")}
               />
-
-              {/* <TouchableOpacity style={styles.icon}>
-                <Icon
-                  name="cloud-download-outline"
-                  size={30}
-                  color={MyColor.primary}
-                />
-              </TouchableOpacity> */}
-              {/* <TouchableOpacity
-                style={styles.icon}
-                onPress={() => setIsModalScheduleVisible(true)}>
-                <Icon
-                  name="calendar-clear-outline"
-                  size={30}
-                  color={MyColor.primary}
-                />
-              </TouchableOpacity> */}
-              {/* <TouchableOpacity
-                style={styles.icon}
-                onPress={() => setModalOfflineStudentVisible(true)}>
-                <FontAwesomeIcon
-                  icon={faAddressBook}
-                  size={25}
-                  color={MyColor.primary}
-                />
-                <Icon name="home" size={30} color={MyColor.primary} />
-              </TouchableOpacity> */}
-
-              {/* <TouchableOpacity style={styles.icon}>
-                            <Ionicons name="arrow-redo-outline" size={30} color={Colors.primaryPupple} />
-                        </TouchableOpacity> */}
             </View>
           
           <ScrollView>
@@ -311,23 +369,17 @@ const SessionScreen = () => {
             </View>
 
             <View style={styles.infoContainer}>
-              <View style={[styles.info, {alignItems: 'flex-start'}]}>
-                <View style={{flexDirection: 'column'}}>
-                  <Text style={styles.textInfo}>LEVEL</Text>
-                  <Text style={styles.textInfo2}>{lesson?.level}</Text>
-                </View>
+              <View style={[styles.info,]}>
+                  <Text style={styles.textInfo2}>LEVEL</Text>
+                  <Text style={styles.textInfo}>{lesson?.level}</Text>
               </View>
               <View style={[styles.info, {alignItems: 'center'}]}>
-                <View style={{flexDirection: 'column'}}>
-                  <Text style={styles.textInfo}>STYLE</Text>
-                  <Text style={styles.textInfo2}>{lesson?.genre}</Text>
-                </View>
+                  <Text style={styles.textInfo2}>STYLE </Text>
+                  <Text style={styles.textInfo}>{lesson?.genre} </Text>
               </View>
               <View style={[styles.info, {alignItems: 'flex-end'}]}>
-                <View style={{flexDirection: 'column'}}>
-                  <Text style={styles.textInfo}>TIME</Text>
-                  <Text style={styles.textInfo2}>{lesson?.total_time} min</Text>
-                </View>
+                  <Text style={styles.textInfo2}>DURATION </Text>
+                  <Text style={styles.textInfo}>{lesson?.duration} </Text>
               </View>
             </View>
 
@@ -339,10 +391,12 @@ const SessionScreen = () => {
                   {joinedData?.result_video_url ? (
                     <View style={styles.videoPreviewContainer}>
                       <Video 
+                        // ref={ref}
                         source={{ uri: joinedData.result_video_url }} 
                         style={styles.videoThumbnail} 
                         resizeMode="cover" 
-                        controls 
+                        // controls={true}
+                        paused={true}
                       />
                     </View>
                   ) : (
@@ -365,10 +419,15 @@ const SessionScreen = () => {
                     )
                   )}
                 </View>
+                {joinedData?.teacher_feedback && (
+                  <View>
+                    <Text style={styles.headerText}>Teacher evaluation</Text>
+                    <SizedBox height={4}/>
+                    <Text style={{fontSize: 16, color: MyColor.black}}>{joinedData.teacher_feedback}</Text>
+                  </View>    
+                )}                  
               </View>
             }
-
-            
 
             {/*THANH COMMUNITY VA PARTICIPNAT (STUDENT KO DC XEM PARTICIPANT)  */}
             <View style={styles.communityContainer}>
@@ -379,7 +438,7 @@ const SessionScreen = () => {
                     <Text style={styles.joinHere}>Join Here</Text>
                   </TouchableOpacity>
                 </View>
-                <CommentCard comments={comments || []} />
+                <CommentCard comments={comments.slice(0, 3) || []} />
               </View>
             </View>
           </ScrollView>
@@ -398,42 +457,6 @@ const SessionScreen = () => {
               </Text>
             )}
           </TouchableOpacity>
-    
-          {/* <Modal
-            visible={isModalOfflineStudentVisible}
-            animationType="fade"
-            transparent={true}>
-            <PopUpFormComponent
-              handleSubmit={handleSubmit}
-              offlinelessons={offlinelessons}
-              handleCloseModal={() => {
-                setModalOfflineStudentVisible(false);
-              }}
-            />
-          </Modal> */}
-    
-          {/* <Modal
-            visible={isModalOfflineVisible}
-            animationType="fade"
-            transparent={true}>
-            <ScheduleLessonComponent
-              handleSubmit={handleSubmitOffline}
-              offlinelessons={offlinelessons}
-              handleCloseModal={() => {
-                setModalOfflineVisible(false);
-              }}
-            />
-          </Modal> */}
-    
-          {/* <Modal visible={isModalScheduleVisible}>
-            <DateTimePicker
-              testID="selectDatePicker"
-              value={selectedDate}
-              mode="date"
-              display="calendar"
-              onChange={(event, selectedDate) => onChangeDate2(event, selectedDate)}
-            />
-          </Modal> */}
         </SafeAreaView>
       );
 }
@@ -527,6 +550,7 @@ const styles = StyleSheet.create({
     infoContainer: {
       // marginTop: 10,
       flexDirection: 'row',
+      // justifyContent: 'space-around',
       height: 80,
       marginHorizontal: 16,
       borderColor: 'grey',
@@ -537,17 +561,20 @@ const styles = StyleSheet.create({
     info: {
       flex: 1,
       justifyContent: 'center',
+      alignContent: 'center',
     },
     textInfo: {
       marginBottom: 5,
       fontSize: 16,
       fontWeight: '300',
       color: 'black',
+      textTransform: 'capitalize'
     },
     textInfo2: {
       fontSize: 16,
       fontWeight: 'bold',
       color: 'black',
+      textTransform: 'uppercase'
     },
     communityContainer: {
       flex: 1,
@@ -609,8 +636,10 @@ const styles = StyleSheet.create({
       height: 500,
     },
     uploadvideo_container: {
-      paddingHorizontal: 16,
+      marginHorizontal: 16,
       paddingVertical: 16,
+      borderColor: 'grey',
+      borderBottomWidth: 0.5,
       // backgroundColor: MyColor.black
     },
     videoPickerContainer: {
@@ -635,7 +664,7 @@ const styles = StyleSheet.create({
     pickButton: {
       paddingVertical: 12,
       paddingHorizontal: 24,
-      backgroundColor: MyColor.primary,
+      backgroundColor: MyColor.blue,
       borderRadius: 8,
     },
     pickButtonText: {
