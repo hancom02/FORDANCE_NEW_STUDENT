@@ -8,4 +8,6 @@ interface IJoin {
     rating: number;
     username: string;
     teacher_feedback: string;
+    last_watch_time: number;
+    longest_watch_time: number;
 }
