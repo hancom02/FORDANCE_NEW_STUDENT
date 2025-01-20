@@ -11,6 +11,8 @@ import {searchServices} from '../../../service/search/searchServices';
 import Tag from '../../search/components/Tag';
 import FilterScreen from '../../search/views/filter_screen';
 import ListInstructor from '../../../components/ListInstructor';
+import MyColor from '../../../constants/color';
+import MyHeader from '../../../components/header';
 
 const HomeScreen = ({navigation}) => {
   const LIST_TAB = ['SESSIONS', 'CLASSES', 'INSTRUCTORS'];
@@ -99,10 +101,8 @@ const HomeScreen = ({navigation}) => {
   }, []);
 
   return (
-    <View>
-      {/* title */}
-      <Title iconBtn={false} navigation={navigation} title={'HOME'} />
-      {/* TABS */}
+    <View style={styles.container}>
+      <MyHeader />
       <ScrollView
         style={styles.scrollView}
         horizontal
@@ -156,18 +156,24 @@ const HomeScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
     flexDirection: 'column',
-    gap: 24,
-    marginBottom: 100
+    gap: 8,
+    // marginBottom: 100,
+    backgroundColor: MyColor.white
+
   },
-  scrollView: {height: '10%'},
+  scrollView: {
+    height: '10%',
+    // backgroundColor: MyColor.black
+
+  },
   tabs: {
     // height: '100%',
     // marginTop: 12,
     flexDirection: 'row',
     gap: 8,
-    paddingHorizontal: 13,
+    paddingHorizontal: 16,
   },
   tabStyle: {
     paddingHorizontal: 8,
