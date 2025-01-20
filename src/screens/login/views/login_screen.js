@@ -39,17 +39,7 @@ export default function LoginScreen() {
     }
   };
   const handleNavSignUp = async () => {
-    setLoading(true);
-    try {
-      await signUp(email, password);
-      Alert.alert('Sign up successful!');      
-      navigation.navigate('LoginScreen');  
-    } catch (err) {
-      // const error = err as Error;
-      Alert.alert(err.message);
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('SignUpScreen')
   }
 
   return (
