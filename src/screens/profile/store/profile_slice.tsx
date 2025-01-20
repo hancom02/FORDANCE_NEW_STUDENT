@@ -29,7 +29,7 @@ export const useProfile = create(
       },
       updateProfile: async (
         uuid: string, 
-        name: string, 
+        username: string, 
         avatar_url: string, 
         prize: string, 
         introduce: string,
@@ -38,7 +38,7 @@ export const useProfile = create(
             const {data, error} = await supabase
             .from('users')
             .update({
-                name,           
+                username,           
                 avatar_url,     
                 prize,          
                 introduce,
