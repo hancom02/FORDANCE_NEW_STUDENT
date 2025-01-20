@@ -13,7 +13,7 @@ export const useAuth = create(
       username: '',
       email: '',
       error: undefined,
-      signIn: async (email, password) => {
+      signIn: async (email : string, password : string) => {
         try {
           const { data: getUserData, error: getUserError } = await supabase
             .from('users')
@@ -66,21 +66,12 @@ export const useAuth = create(
           Alert.alert('Error', err.message);
         }
       },      
-      signUp: async (email, password) => {
+      signUp: async (email : string, password : string, username: string) => {
         try {
           if (typeof password !== 'string' || password.trim() === '') {
             throw new Error('Password must be a non-empty string');
           }
-          // const saltRounds = 10;
-          // if (!Number.isInteger(saltRounds)) {
-          //   throw new Error('Invalid salt rounds');
-          // }
-          // const hashedPassword = await bcrypt.hash('hancom02', saltRounds);
-          // console.log("hashedPassword: " + hashedPassword);
-
-          // const {data, error } = await supabase.auth.signUp({ email, password});
          
-
           const { data, error } = await supabase.auth.signUp(
             {
               email: email,
@@ -88,6 +79,7 @@ export const useAuth = create(
               options: {
                 data: {
                   role:'student',
+                  username: username,
                 }
               }
             }
