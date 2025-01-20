@@ -14,10 +14,12 @@ import RatingScreen from '../screens/rating_session/view/rating_session_screen';
 import ClassNewScreen from '../screens/class_new/view/class_new_screen';
 import CommunityScreen from '../screens/community/view/community_screen';
 import ProfileScreen from '../screens/profile/view/profile_screen';
-import SettingScreen from '../screens/account/view/account_screen';
 import InstructorProfileScreen from '../screens/instructor_profile/instructor_profile_screen';
 import ListFavSessionScreen from '../screens/list_fav_session/view/list_fav_session_screen';
 import ListJoinSessionScreen from '../screens/list_join_session/view/list_join_session_screen';
+import SignUpScreen from '../screens/sign_up/view/sign_up_sreen';
+import AccountNewScreen from '../screens/account/view/account_new_screen';
+import IntroduceScreen from '../screens/introduce/view/introduce_screen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,8 +57,8 @@ function BottomTab() {
         })}
       />
       <Tab.Screen
-        name="SettingScreen"
-        component={SettingScreen}
+        name="AccountNewScreen"
+        component={AccountNewScreen}
         options={({}) => ({
           tabBarIcon: ({focused}) => (
             <Icon
@@ -76,6 +78,7 @@ export default function Navigation() {
     <NavigationContainer>
       <Stack.Navigator id={undefined} screenOptions={{headerShown: false}}>
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
         <Stack.Screen name="SearchScreen" component={SearchScreen} />
         <Stack.Screen name="ClassNewScreen" component={ClassNewScreen} />
@@ -87,6 +90,8 @@ export default function Navigation() {
         <Stack.Screen name="InstructorProfileScreen" component={InstructorProfileScreen} />
         <Stack.Screen name="ListFavSessionScreen" component={ListFavSessionScreen} />
         <Stack.Screen name="ListJoinSessionScreen" component={ListJoinSessionScreen} />
+        <Stack.Screen name="IntroduceScreen" component={IntroduceScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
