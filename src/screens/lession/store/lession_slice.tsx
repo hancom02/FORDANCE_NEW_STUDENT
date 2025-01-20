@@ -79,6 +79,24 @@ export const useSession = create(
           throw new Error('Failed to get favourite status');
         }
       },
+      getFavSessionQuantity: async (session_id: string): Promise<number> => {
+        try {
+          const { data, count, error } = await supabase
+          .from('users_sessions_favourite')
+          .select('*', { count: 'exact' })
+          .eq('session_id', session_id)
+          .eq('is_favourite', true);
+
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          return count || 0;
+        } catch (error) {
+          console.error('Error in insertFavourite:', err.message);
+          throw new Error('Failed to insert favourite');
+        }
+      },
       insertFavourite: async (session_id: string, user_id: string): Promise<void> => {
         try {
           const {data, error } = await supabase
@@ -161,7 +179,7 @@ export const useSession = create(
             .from('users_sessions_joined')
             .update({ result_video_url })
             .match({ user_id, session_id })
-            .select(); // Thêm select() để chắc chắn lấy dữ liệu hàng cập nhật
+            .select(); 
       
           if (error) {
             console.error('Error inserting video result:', error.message);
@@ -179,7 +197,29 @@ export const useSession = create(
           console.error('Catch Error:', err.message || err);
           throw new Error(err.message || 'Failed to insert video result');
         }
-      },         
+      }, 
+      // getInstructorFeedback: async (sessionId: string, userId: string): Promise<string | null> => {
+      //   try {
+      //     const { data, error } = await supabase
+      //     .from('users_sessions_joined')
+      //     .select('teacher_feedback')
+      //     .eq('user_id', userId)
+      //     .eq('session_id', sessionId)
+      //     .single();
+
+      //     if (error) {
+      //       console.error('Error:', error.message);
+      //       set((state) => {
+      //         state.error = error.message;
+      //       });
+      //       throw new Error(error.message);
+      //     }
+      //     return data;
+
+      //   } catch (err) {
+
+      //   }
+      // },
       getInstructor: async (instructorId: string): Promise<IInstructor | null> => {
         try {
             const { data: instructorData, error: classError } = await supabase
@@ -188,7 +228,7 @@ export const useSession = create(
             .eq('id', instructorId)
             .single(); 
 
-            console.log('getInstructor, instructorId: ', instructorId);
+            // console.log('getInstructor, instructorId: ', instructorId);
 
             if (classError) {
               console.error('Error:', classError.message);
@@ -266,6 +306,41 @@ export const useSession = create(
           console.error('Error in insertJoinSession:', err.message);
           throw new Error('Failed to insert joined session');
         }
+      },
+      updateProgressSession: async (
+        session_id: string, 
+        user_id: string, 
+        last_watch_time: number, 
+        longest_watch_time: number,
+        // progress: number,
+      ): Promise<IJoin | false> => {
+        try {
+          if (!session_id || !user_id) {
+            console.error('Invalid session data');
+            return false;
+          }
+      
+          const { data, error } = await supabase
+            .from('users_sessions_joined')
+            .update({
+              last_watch_time: last_watch_time,
+              longest_watch_time: longest_watch_time,
+            })
+            .eq('user_id', user_id)
+            .eq('session_id', session_id)
+            .single();
+      
+          if (error) {
+            console.error('Error updating session progress:', error);
+            return false;
+          }
+      
+          console.log('Session progress updated successfully:', data);
+          return data as IJoin;
+        } catch (err) {
+          console.error('Error in updateJoinedSession:', err);
+          return false;
+        }
       },         
       fetchComments: async (session_id: string): Promise<IComment[] | null> => {
         try {
@@ -277,7 +352,7 @@ export const useSession = create(
           if (cmtError) {
               throw new Error(cmtError.message);
           }
-          console.log('comments from table comments: ', cmtDta);
+          // console.log('comments from table comments: ', cmtDta);
 
           const commentsWithUserInfo: IComment[] = [];
           for (const comment of cmtDta) {
@@ -297,7 +372,7 @@ export const useSession = create(
               };
               commentsWithUserInfo.push(commentWithUser);
           }
-          console.log('comments with user infor: ', commentsWithUserInfo);
+          // console.log('comments with user infor: ', commentsWithUserInfo);
 
           return commentsWithUserInfo;
         } catch (err) {
