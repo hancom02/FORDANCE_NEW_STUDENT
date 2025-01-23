@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import {
   Platform,
   PermissionsAndroid,
   Keyboard,
+  Modal,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyColor from '../../../constants/color';
 import { useAuth } from '../../../store/auth_slice';
@@ -24,140 +25,212 @@ import TextButton from '../../../components/text_button';
 import SizedBox from '../../../components/size_box';
 import { useComment } from '../store/community_slice';
 
-
 const CommunityScreen = () => {
-    const route = useRoute<RouteProp<{ params: { session_id: string } }, 'params'>>();
-    const { session_id } = route.params;
-    const navigation = useNavigation();
+  const route = useRoute<RouteProp<{ params: { session_id: string } }, 'params'>>();
+  const { session_id } = route.params;
+  const navigation = useNavigation();
 
-    console.log('session_id in community: ', session_id);
+  console.log('session_id in community: ', session_id);
 
-    const {uuid, username, avatar_url} = useAuth();
-    const {getComment, addComment} = useComment();
+  const { uuid, username, avatar_url } = useAuth();
+  const { getComment, addComment } = useComment();
 
-    const [comments, setComments] = useState<IComment[]>([]);
+  const [comments, setComments] = useState<IComment[]>([]);
+  const [sortComment, setSortComment] = useState('');
+  const [replyText, setReplyText] = useState('');
+  const [replyTo, setReplyTo] = useState<string | null>(null); // Lưu parent_comment_id
+  const [uri, setUri] = useState('');
+  const [image, setImage] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // Modal visibility
 
-    const [replyText, setReplyText] = useState('');
-    const [replyTo, setReplyTo] = useState<string | null>(null); // Lưu parent_comment_id
-
-    const [uri, setUri] = useState('');
-    const [image, setImage] = useState('');
-    const [imgUrl, setImgUrl] = useState('');
-    const [videoUrl, setVideoUrl] = useState('');
-
-    const [loading, setLoading] = useState(false);
-
-    const fectchCommentData = async () => { 
-        await getComment(session_id)
-        .then((comments) => {
-          const sortedComments = sortComments(comments); // Sắp xếp trước khi hiển thị
-          setComments(sortedComments);
-        })
-        .catch((err) => {
-          console.log('error in fetchCommentData: ', err);
-        });
-    }
-    const handleGoBack = () => {
-        navigation.goBack();
-    };
-
-    useEffect(() => {
-        fectchCommentData();
-    }, []);
-
-    console.log('comments in community: ', comments);
-
-    const handleSelectImage = async () => {
-      const hasPermission = await checkStoragePermission();
-      if (hasPermission) {
-        const selectedImageUri = await pickImage();
-        setUri(selectedImageUri || '');
-      } else {
-        console.log('Storage permission denied');
-      }
-    }
-    const handleRemoveImage = () => {
-      setUri('');
-      setImgUrl('');
-    };
-
-    const onPressSubmit = async () => {
-      setLoading(true);
-
-      let url = '';
-      if (uri) {
-        url = await UploadImageToSupabase(uri, uuid);
-        console.log('url ------------------- : ', url);
-      }   
-
-        const newComment: ICommentDta = {
-            content: replyText,
-            session_id: session_id,
-            user_id: uuid,
-            img_url: url || '',
-            created_at: new Date().toISOString(),
-            video_url: '',
-            parent_comment_id: replyTo ?? undefined,
-        };
-        const newCommentWithUser: IComment = {
-            ...newComment,
-            username: username,
-            avatar_url: avatar_url,
-            img_url: '',
-            parent_comment_id: newComment.parent_comment_id || '',
-        }
-
-        await addComment(newComment)
-        .then((comment) => {
-          const updatedComments = [...comments, newCommentWithUser];
-          setComments(sortComments(updatedComments)); // Sắp xếp lại danh sách
-          setLoading(false);
-          handleRemoveImage();
-        })
-        .catch((err) => {
-          console.log('error in addComment: ', err);
-        });
-    };
-
-    const onPressReply = (commentId: string) => {
-      setReplyTo(commentId); 
-      Keyboard.dismiss();
-    };
-
-    const sortComments = (comments: IComment[]): IComment[] => {
-      const commentMap = new Map<string, IComment[]>();
-    
-      // Nhóm các comment reply theo `parent_comment_id`
-      comments.forEach((comment) => {
-        const parentId = comment.parent_comment_id || 'root'; // Nếu không có parent_comment_id thì là comment gốc
-        if (!commentMap.has(parentId)) {
-          commentMap.set(parentId, []);
-        }
-        commentMap.get(parentId)?.push(comment);
+  const fetchCommentData = async () => {
+    await getComment(session_id)
+      .then((comments) => {
+        const sortedComments = sortComments(comments); // Sắp xếp trước khi hiển thị
+        setComments(sortedComments);
+      })
+      .catch((err) => {
+        console.log('error in fetchCommentData: ', err);
       });
-    
-      // Sắp xếp danh sách theo mối quan hệ parent -> child
-      const sorted: IComment[] = [];
-    
-      const addComments = (parentId: string) => {
-        const replies = commentMap.get(parentId) || [];
-        replies.forEach((reply) => {
-          sorted.push(reply);
-          if (reply.id) { // Kiểm tra nếu `reply.id` không phải là undefined
-            addComments(reply.id);
-          }
-        });
-      };
-    
-      // Thêm tất cả comment gốc (parent_comment_id === 'root') và đệ quy
-      addComments('root');
-    
-      return sorted;
+  };
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
+  useEffect(() => {
+    fetchCommentData();
+  }, []);
+
+  console.log('comments in community: ', comments);
+
+  const handleSelectImage = async () => {
+    const hasPermission = await checkStoragePermission();
+    if (hasPermission) {
+      const selectedImageUri = await pickImage();
+      setUri(selectedImageUri || '');
+    } else {
+      console.log('Storage permission denied');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUri('');
+    setImgUrl('');
+  };
+
+  const onPressSubmit = async () => {
+    setLoading(true);
+
+    let url = '';
+    if (uri) {
+      url = await UploadImageToSupabase(uri, uuid);
+      console.log('url ------------------- : ', url);
+    }
+
+    const newComment: ICommentDta = {
+      content: replyText,
+      session_id: session_id,
+      user_id: uuid,
+      img_url: url || '',
+      created_at: new Date().toISOString(),
+      video_url: '',
+      parent_comment_id: replyTo ?? undefined,
     };
 
-  const renderItemNew = ({item, index}: {item: IComment, index: number}) => {
-    const isReply = !!item.parent_comment_id;
+    const newCommentWithUser: IComment = {
+      ...newComment,
+      username: username,
+      avatar_url: avatar_url,
+      img_url: '',
+      parent_comment_id: newComment.parent_comment_id || '',
+    };
+
+    await addComment(newComment)
+      .then((comment) => {
+        const updatedComments = [...comments, newCommentWithUser];
+        setComments(sortAscendingComment(sortComments(updatedComments)));
+        setLoading(false);
+        handleRemoveImage();
+      })
+      .catch((err) => {
+        console.log('error in addComment: ', err);
+      });
+  };
+
+  const handleFilter = () => {
+    setModalVisible(true); // Mở modal khi nhấn vào filter
+  };
+
+  const handleSelectSortOption = (option: string) => {
+    if (option === 'Newest') {
+      setComments(sortAscendingComment(comments)); // Sort theo mới nhất
+    } else if (option === 'Oldest') {
+      setComments(sortDescendingComment(comments)); // Sort theo cũ nhất
+    }
+    setModalVisible(false); // Đóng modal khi chọn xong
+  };
+
+  const sortAscendingComment = (comments: IComment[]): IComment[] => {
+    const commentMap = new Map<string, IComment[]>();
+
+    comments.forEach((comment) => {
+      const parentId = comment.parent_comment_id || 'root';
+      if (!commentMap.has(parentId)) {
+        commentMap.set(parentId, []);
+      }
+      commentMap.get(parentId)?.push(comment);
+    });
+
+    const sorted: IComment[] = [];
+
+    const addComments = (parentId: string) => {
+      const replies = commentMap.get(parentId) || [];
+      replies.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      replies.forEach((reply) => {
+        sorted.push(reply);
+        if (reply.id) {
+          addComments(reply.id);
+        }
+      });
+    };
+
+    addComments('root');
+    return sorted;
+  };
+
+  const sortDescendingComment = (comments: IComment[]): IComment[] => {
+    const commentMap = new Map<string, IComment[]>();
+
+    comments.forEach((comment) => {
+      const parentId = comment.parent_comment_id || 'root';
+      if (!commentMap.has(parentId)) {
+        commentMap.set(parentId, []);
+      }
+      commentMap.get(parentId)?.push(comment);
+    });
+
+    const sorted: IComment[] = [];
+
+    const addComments = (parentId: string) => {
+      const replies = commentMap.get(parentId) || [];
+      replies.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      replies.forEach((reply) => {
+        sorted.push(reply);
+        if (reply.id) {
+          addComments(reply.id);
+        }
+      });
+    };
+
+    addComments('root');
+    return sorted;
+  };
+
+  const sortComments = (comments: IComment[]): IComment[] => {
+    const commentMap = new Map<string, IComment[]>();
   
+    // Nhóm các comment reply theo `parent_comment_id`
+    comments.forEach((comment) => {
+      const parentId = comment.parent_comment_id || 'root'; // Nếu không có parent_comment_id thì là comment gốc
+      if (!commentMap.has(parentId)) {
+        commentMap.set(parentId, []);
+      }
+      commentMap.get(parentId)?.push(comment);
+    });
+  
+    // Sắp xếp danh sách theo mối quan hệ parent -> child
+    const sorted: IComment[] = [];
+  
+    const addComments = (parentId: string) => {
+      const replies = commentMap.get(parentId) || [];
+      replies.forEach((reply) => {
+        sorted.push(reply);
+        if (reply.id) { // Kiểm tra nếu `reply.id` không phải là undefined
+          addComments(reply.id);
+        }
+      });
+    };
+  
+    // Thêm tất cả comment gốc (parent_comment_id === 'root') và đệ quy
+    addComments('root');
+  
+    return sorted;
+  };
+
+
+
+  const onPressReply = (commentId: string) => {
+    setReplyTo(commentId);
+    Keyboard.dismiss();
+  };
+
+  const renderItemNew = ({ item, index }: { item: IComment; index: number }) => {
+    const isReply = !!item.parent_comment_id;
+
     return (
       <View style={[styles.commentContainerParent, isReply && styles.replyIndent]}>
         <View style={styles.commentContainer}>
@@ -196,21 +269,6 @@ const CommunityScreen = () => {
     );
   };
 
-//   const handleReply = () => {
-//     mutate({content: replyText, lessonId: lesson.id});
-//     setComments(prev => [
-//       ...prev,
-//       {
-//         content: replyText,
-//         student: {
-//           avatar_url: avatar_url,
-//           name: username,
-//         },
-//       },
-//     ]);
-//     setReplyText('');
-//   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -220,24 +278,42 @@ const CommunityScreen = () => {
         <Text style={styles.headerTitle}>Community</Text>
       </View>
       <View style={styles.separator} />
+      <TouchableOpacity onPress={handleFilter} style={{ width: '100%', alignItems: 'flex-end', marginBottom: 16 }}>
+        <Icon name="filter" color={MyColor.black} size={24} />
+      </TouchableOpacity>
+
+      {/* Modal for filter options */}
+      <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sort Comments</Text>
+            <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectSortOption('Newest')}>
+              <Text style={styles.optionText}>Newest</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectSortOption('Oldest')}>
+              <Text style={styles.optionText}>Oldest</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <FlatList
         data={comments}
         renderItem={renderItemNew}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.replyInputContainer}
-      >
+
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.replyInputContainer}>
         <View style={{ width: '65%', justifyContent: 'flex-start' }}>
           <TextInput
             style={styles.replyInput}
             multiline
             numberOfLines={3}
-            placeholder={
-              replyTo ? `Replying to comment #${replyTo}` : 'Your question...'
-            }
+            placeholder={replyTo ? `Replying to comment #${replyTo}` : 'Your question...'}
             value={replyText}
             onChangeText={setReplyText}
           />
@@ -250,25 +326,16 @@ const CommunityScreen = () => {
                 resizeMethod="scale"
                 resizeMode="cover"
               />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={handleRemoveImage}
-              >
+              <TouchableOpacity style={styles.removeImageButton} onPress={handleRemoveImage}>
                 <Icon name="times-circle" size={20} color="white" />
               </TouchableOpacity>
             </View>
           )}
         </View>
-        <TouchableOpacity
-          style={{ marginTop: 20, marginLeft: 16 }}
-          onPress={handleSelectImage}
-        >
+        <TouchableOpacity style={{ marginTop: 20, marginLeft: 16 }} onPress={handleSelectImage}>
           <Icon name="image" size={20} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.replySendButton}
-          onPress={onPressSubmit}
-        >
+        <TouchableOpacity style={styles.replySendButton} onPress={onPressSubmit}>
           <Text style={styles.submitText}>Submit</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
@@ -277,7 +344,6 @@ const CommunityScreen = () => {
 };
 
 export default CommunityScreen;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -440,5 +506,49 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
     padding: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: 'black',
+  },
+  optionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginVertical: 5,
+    backgroundColor: MyColor.primary,
+    width: '100%',
+    alignItems: 'center',
+  },
+  optionText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  closeButton: {
+    paddingVertical: 10,
+    marginTop: 10,
+    backgroundColor: MyColor.black,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  closeText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
