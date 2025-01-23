@@ -8,4 +8,5 @@ interface IComment {
     img_url: string;
     video_url: string;
     parent_comment_id: string;
+    created_at: string;
 }
